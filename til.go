@@ -16,4 +16,6 @@ func main() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
+	fmt.Println(fmt.Sprintf("Created: %s", filename))
 }
