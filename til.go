@@ -16,6 +16,8 @@ const (
 )
 
 func main() {
+	// Every argument is considered a part of the title. If there are no arguments, we have no title
+	// Cannot have a file without a title
 	if len(os.Args[1:]) < 1 {
 		fmt.Println("Must have a title")
 		os.Exit(1)
@@ -25,23 +27,28 @@ func main() {
 	title := strings.Join(os.Args[1:], " ")
 	filepath := fmt.Sprintf("%s-%s.%s", date, strings.ReplaceAll(strings.ToLower(title), " ", "-"), fileExtension)
 
-	metadata := fmt.Sprintf(
+	// Front matter lives at the top of the generated file and contains bits of info about the file
+	// This is loosely based on the format Hugo uses
+	frontMatter := fmt.Sprintf(
 		"---\ndate: %s\ntitle: %s\n---\n\n\n",
 		date,
 		strings.Title(title),
 	)
 
-	err := ioutil.WriteFile(fmt.Sprintf("./%s", filepath), []byte(metadata), 0644)
+	// Write out the stub file, explode if we can't do that
+	err := ioutil.WriteFile(fmt.Sprintf("./%s", filepath), []byte(frontMatter), 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// And open the file for editing, exploding if we can't do that
 	cmd := exec.Command(editor, filepath)
 	err = cmd.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Dump the filepath because this makes it easy to see which file we just created (and delete it, when debugging and testing)
 	fmt.Println(filepath)
 	os.Exit(0)
 }
