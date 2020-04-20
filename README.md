@@ -7,3 +7,10 @@ I use this `zsh` alias to execute it from whichever directory I'm in:
 ```shell
 alias til='cd ~/Documents/til && go run ./til.go'
 ```
+
+Example:
+
+```shell
+❯ til Testing title
+2020-04-20T14:52:57-07:00-testing-title.md
+```
