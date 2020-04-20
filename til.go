@@ -12,7 +12,7 @@ func main() {
 
 	filename := fmt.Sprintf("%s.txt", fDate)
 
-	err := ioutil.WriteFile(fmt.Sprintf("./%s", filename), []byte(fmt.Sprintf("%s\n\n", fDate)), 0644)
+	err := ioutil.WriteFile(fmt.Sprintf("./%s", filename), []byte(fmt.Sprintf("date: %s\n\n", fDate)), 0644)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
