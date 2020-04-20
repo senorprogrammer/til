@@ -10,7 +10,10 @@ import (
 	"time"
 )
 
-const editor = "mvim"
+const (
+	editor        = "mvim"
+	fileExtension = "md"
+)
 
 func main() {
 	if len(os.Args[1:]) < 1 {
@@ -20,9 +23,7 @@ func main() {
 
 	date := time.Now().Format(time.RFC3339)
 	title := strings.Join(os.Args[1:], " ")
-
-	extension := "md"
-	filepath := fmt.Sprintf("%s-%s.%s", date, strings.ReplaceAll(strings.ToLower(title), " ", "-"), extension)
+	filepath := fmt.Sprintf("%s-%s.%s", date, strings.ReplaceAll(strings.ToLower(title), " ", "-"), fileExtension)
 
 	metadata := fmt.Sprintf(
 		"---\ndate: %s\ntitle: %s\n---\n\n\n",
@@ -32,17 +33,15 @@ func main() {
 
 	err := ioutil.WriteFile(fmt.Sprintf("./%s", filepath), []byte(metadata), 0644)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(err)
 	}
 
-	fmt.Println(filepath)
-
-	// Open this file in mvim
 	cmd := exec.Command(editor, filepath)
 	err = cmd.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	fmt.Println(filepath)
 	os.Exit(0)
 }
