@@ -24,19 +24,21 @@ func main() {
 	}
 
 	date := time.Now().Format(time.RFC3339)
-	title := strings.Join(os.Args[1:], " ")
+	title := strings.Title(strings.Join(os.Args[1:], " "))
 	filepath := fmt.Sprintf("%s-%s.%s", date, strings.ReplaceAll(strings.ToLower(title), " ", "-"), fileExtension)
 
 	// Front matter lives at the top of the generated file and contains bits of info about the file
 	// This is loosely based on the format Hugo uses
 	frontMatter := fmt.Sprintf(
-		"---\ndate: %s\ntitle: %s\n---\n\n\n",
+		"---\ndate: %s\ntitle: %s\n---\n\n",
 		date,
-		strings.Title(title),
+		title,
 	)
 
+	content := frontMatter + fmt.Sprintf("# %s\n\n\n", title)
+
 	// Write out the stub file, explode if we can't do that
-	err := ioutil.WriteFile(fmt.Sprintf("./%s", filepath), []byte(frontMatter), 0644)
+	err := ioutil.WriteFile(fmt.Sprintf("./%s", filepath), []byte(content), 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
