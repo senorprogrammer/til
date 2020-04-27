@@ -25,14 +25,16 @@ func main() {
 
 	date := time.Now().Format(time.RFC3339)
 	title := strings.Title(strings.Join(os.Args[1:], " "))
+	tags := ""
 	filepath := fmt.Sprintf("%s-%s.%s", date, strings.ReplaceAll(strings.ToLower(title), " ", "-"), fileExtension)
 
 	// Front matter lives at the top of the generated file and contains bits of info about the file
 	// This is loosely based on the format Hugo uses
 	frontMatter := fmt.Sprintf(
-		"---\ndate: %s\ntitle: %s\n---\n\n",
+		"---\ndate: %s\ntitle: %s\ntags: %s\n---\n\n",
 		date,
 		title,
+		tags,
 	)
 
 	content := frontMatter + fmt.Sprintf("# %s\n\n\n", title)
