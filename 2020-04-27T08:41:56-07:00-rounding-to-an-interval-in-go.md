@@ -1,6 +1,7 @@
 ---
 date: 2020-04-27T08:41:56-07:00
 title: Rounding To An Interval In Go
+tags: go
 ---
 
 # Rounding To An Interval In Go
