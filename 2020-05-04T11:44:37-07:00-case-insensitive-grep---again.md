@@ -1,7 +1,7 @@
 ---
 date: 2020-05-04T11:44:37-07:00
 title: Case-Insensitive Grep - Again
-tags: grep
+tags: grep, linux, terminal
 ---
 
 # Case-Insensitive Grep - Again
