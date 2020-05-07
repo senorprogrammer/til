@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -21,6 +22,13 @@ func main() {
 	if len(os.Args[1:]) < 1 {
 		fmt.Println("Must have a title")
 		os.Exit(1)
+	}
+
+	boolPtr := flag.Bool("build", false, "builds the index and tag pages")
+	flag.Parse()
+	if *boolPtr {
+		fmt.Println("building pages....")
+		os.Exit(0)
 	}
 
 	date := time.Now().Format(time.RFC3339)
