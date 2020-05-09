@@ -26,8 +26,8 @@ func main() {
 	if *boolPtr {
 		pages := loadPages()
 
-		buildIndexPage(pages)
-		buildTagPages(pages)
+		tags := buildTagPages(pages)
+		buildIndexPage(pages, tags)
 
 		os.Exit(0)
 	}
@@ -49,13 +49,13 @@ func main() {
 	// And rebuild the index and tag pages
 	pages := loadPages()
 
-	buildIndexPage(pages)
-	buildTagPages(pages)
+	tags := buildTagPages(pages)
+	buildIndexPage(pages, tags)
 
 	os.Exit(0)
 }
 
-func buildIndexPage(pages []*Page) {
+func buildIndexPage(pages []*Page, tags []string) {
 	content := "A collection of things\n\n"
 
 	// Loop over the pages in reverse, which puts them in reverse-chronological order
@@ -63,6 +63,15 @@ func buildIndexPage(pages []*Page) {
 		if page.IsContentPage() {
 			content += fmt.Sprintf("* %s\n", page.Link())
 		}
+	}
+
+	// Loop over the tags in order and create links to those pages
+	for _, tag := range tags {
+		content += fmt.Sprintf(
+			"[%s](%s), ",
+			strings.TrimSpace(tag),
+			fmt.Sprintf("./docs/%s", tag),
+		)
 	}
 
 	// Write a small note at the bottom that tells when the index page was last generated
@@ -77,7 +86,7 @@ func buildIndexPage(pages []*Page) {
 }
 
 // buildTagPages creates the tag pages, with links to posts tagged with those values
-func buildTagPages(pages []*Page) {
+func buildTagPages(pages []*Page) []string {
 	tags := make(map[string][]*Page)
 
 	// Sort the pages into tag buckets
@@ -110,6 +119,7 @@ func buildTagPages(pages []*Page) {
 			log.Fatal(err)
 		}
 	}
+	return tagArr
 }
 
 func createNewPage(title string) string {

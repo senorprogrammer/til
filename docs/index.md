@@ -1,6 +1,5 @@
 A collection of things
 
-*  <code>May 09, 2020</code> [How To Generate Tag Files](2020-05-09T00-12-13-how-to-generate-tag-files.md)
 *  <code>May 08, 2020</code> [Gell-Mann Amnesia](2020-05-08T09-08-00-gell-mann-amnesia.md)
 *  <code>May 07, 2020</code> [Genuine Leather](2020-05-07T13-13-08-genuine-leather.md)
 *  <code>May 07, 2020</code> [IP Address Int to Dotted Quad](2020-05-07T10-14-06-ip-address-int-to-dotted-quad.md)
@@ -11,5 +10,5 @@ A collection of things
 *  <code>Apr 23, 2020</code> [Numeric Ascii Codes](2020-04-23T06-06-02-numeric-ascii-codes.md)
 *  <code>Apr 20, 2020</code> [Another Test](2020-04-20T15-13-29.md)
 *  <code>Apr 20, 2020</code> [Aluminum Cookware and Dishwashers](2020-04-20T13-53-12.md)
-
-<sup><sub>generated 9 May 2020 00:14:43</sub></sup>
+[language](./docs/language), [grep](./docs/grep), [linux](./docs/ linux), [terminal](./docs/ terminal), [](./docs/), [culture](./docs/culture), [psychology](./docs/ psychology), [go](./docs/go), 
+<sup><sub>generated 9 May 2020 00:26:45</sub></sup>
