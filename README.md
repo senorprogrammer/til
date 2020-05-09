@@ -10,6 +10,16 @@ alias til='cd ~/Documents/til && go run ./til.go'
 
 (Yep, I don't bother to compile/install it, it's fast enough as-is).
 
+## Installation
+
+To use this yourself, the simplest approach is probably to clone this repo yourself and just delete the content from the `/docs` directory.
+
+You could also:
+
+* create your own empty git repo
+* copy `til.go` into it
+* create the `docs` directory: `mkdir docs`
+
 ## Usage
 
 ### Create a new page
