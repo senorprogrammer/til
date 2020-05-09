@@ -59,16 +59,9 @@ func buildIndexPage(pages []*Page) {
 	content := "A collection of things\n\n"
 
 	// Loop over the pages in reverse, which puts them in reverse-chronological order
-	for i := len(pages) - 1; i >= 0; i-- {
-		page := pages[i]
-
+	for _, page := range pages {
 		if page.IsContentPage() {
-			content += fmt.Sprintf(
-				"* <code>%s</code> [%s](%s)\n",
-				page.PrettyDate(),
-				page.Title,
-				strings.Replace(page.FilePath, "docs/", "", -1),
-			)
+			content += fmt.Sprintf("* %s\n", page.Link())
 		}
 	}
 
@@ -104,6 +97,12 @@ func buildTagPages(pages []*Page) {
 
 	for _, tag := range tagArr {
 		content := fmt.Sprintf("%s\n\n", tag)
+
+		for _, page := range tags[tag] {
+			if page.IsContentPage() {
+				content += fmt.Sprintf("* %s\n", page.Link())
+			}
+		}
 
 		// And write the file to disk
 		err := ioutil.WriteFile(fmt.Sprintf("./docs/%s.md", tag), []byte(content), 0644)
@@ -146,6 +145,8 @@ func createNewPage(title string) string {
 	return filePath
 }
 
+// loadPages reads the page files from disk (in reverse chronological order) and
+// creates Page instances from them
 func loadPages() []*Page {
 	pages := []*Page{}
 
@@ -200,6 +201,15 @@ func (page *Page) CreatedAt() time.Time {
 	}
 
 	return date
+}
+
+// Link returns a link string suitable for embedding in a Markdown page
+func (page *Page) Link() string {
+	return fmt.Sprintf(
+		" <code>%s</code> [%s](%s)",
+		page.PrettyDate(),
+		page.Title,
+		strings.Replace(page.FilePath, "docs/", "", -1))
 }
 
 // IsContentPage returns true if the page is a valid entry page, false if it is not
