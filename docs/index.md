@@ -18,4 +18,4 @@
 
 [culture](./culture), [psychology](./psychology), [go](./go), [language](./language), [grep](./grep), [linux](./linux), [terminal](./terminal), 
 
-<sup><sub>generated 9 May 2020 09:04:17</sub></sup>
+<sup><sub>generated 9 May 2020 09:25:40</sub></sup>

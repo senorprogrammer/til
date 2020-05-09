@@ -68,6 +68,7 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 			continue
 		}
 
+		// This breaks the page list up by month
 		if prevPage.CreatedMonth() != page.CreatedMonth() {
 			content += "\n\n"
 		}
