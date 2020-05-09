@@ -16,6 +16,6 @@
 
 *  <code>Mar 30, 2020</code> [First Post](2020-03-30T11-11-11-first-post.md)
 
-[culture](./culture), [psychology](./psychology), [go](./go), [language](./language), [grep](./grep), [linux](./linux), [terminal](./terminal), 
+[go](./go), [language](./language), [grep](./grep), [linux](./linux), [terminal](./terminal), [culture](./culture), [psychology](./psychology), 
 
-<sup><sub>generated 9 May 2020 09:25:40</sub></sup>
+<sup><sub>generated 9 May 2020 09:42:28</sub></sup>
