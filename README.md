@@ -26,7 +26,7 @@ You could also:
 
 ```bash
 ❯ til Testing title
-2020-04-20T14:52:57-07:00-testing-title.md
+2020-04-20T14-52-57-testing-title.md
 ```
 
 And then that page will open in [MacVim](https://macvim-dev.github.io/macvim/).
