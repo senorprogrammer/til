@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -65,18 +66,22 @@ func buildIndexPage(pages []*Page, tags []string) {
 		}
 	}
 
+	content += fmt.Sprintf("\n")
+
 	// Loop over the tags in order and create links to those pages
+	sort.Strings(tags)
 	for _, tag := range tags {
 		content += fmt.Sprintf(
 			"[%s](%s), ",
-			strings.TrimSpace(tag),
-			fmt.Sprintf("./docs/%s", tag),
+			tag,
+			fmt.Sprintf("./%s", tag),
 		)
 	}
 
-	// Write a small note at the bottom that tells when the index page was last generated
 	content += fmt.Sprintf("\n")
-	content += fmt.Sprintf("<sup><sub>generated %s</sub></sup>\n", time.Now().Format("2 Jan 2006 15:04:05"))
+	content += fmt.Sprintf("\n")
+
+	content += timestamp()
 
 	// And write the file to disk
 	err := ioutil.WriteFile("./docs/index.md", []byte(content), 0644)
@@ -92,13 +97,18 @@ func buildTagPages(pages []*Page) []string {
 	// Sort the pages into tag buckets
 	for _, page := range pages {
 		for _, tag := range page.Tags() {
-			tags[tag] = append(tags[tag], page)
+			tag = strings.TrimSpace(tag)
+
+			if tag != "" {
+				tags[tag] = append(tags[tag], page)
+			}
 		}
 	}
 
 	// Then enumerate over the tags in alphabetical order and create a page for each of them
 	tagArr := make([]string, len(tags))
 	i := 0
+
 	for tag := range tags {
 		tagArr[i] = tag
 		i++
@@ -112,6 +122,10 @@ func buildTagPages(pages []*Page) []string {
 				content += fmt.Sprintf("* %s\n", page.Link())
 			}
 		}
+
+		content += fmt.Sprintf("\n")
+
+		content += timestamp()
 
 		// And write the file to disk
 		err := ioutil.WriteFile(fmt.Sprintf("./docs/%s.md", tag), []byte(content), 0644)
@@ -190,6 +204,10 @@ func readPage(filePath string) *Page {
 	page.FilePath = filePath
 
 	return page
+}
+
+func timestamp() string {
+	return fmt.Sprintf("<sup><sub>generated %s</sub></sup>\n", time.Now().Format("2 Jan 2006 15:04:05"))
 }
 
 /* -------------------- Types -------------------- */

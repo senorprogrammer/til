@@ -10,5 +10,7 @@ A collection of things
 *  <code>Apr 23, 2020</code> [Numeric Ascii Codes](2020-04-23T06-06-02-numeric-ascii-codes.md)
 *  <code>Apr 20, 2020</code> [Another Test](2020-04-20T15-13-29.md)
 *  <code>Apr 20, 2020</code> [Aluminum Cookware and Dishwashers](2020-04-20T13-53-12.md)
-[language](./docs/language), [grep](./docs/grep), [linux](./docs/ linux), [terminal](./docs/ terminal), [](./docs/), [culture](./docs/culture), [psychology](./docs/ psychology), [go](./docs/go), 
-<sup><sub>generated 9 May 2020 00:26:45</sub></sup>
+
+[culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
+
+<sup><sub>generated 9 May 2020 00:39:55</sub></sup>
