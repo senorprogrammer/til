@@ -11,6 +11,6 @@ A collection of things
 *  <code>Apr 20, 2020</code> [Another Test](2020-04-20T15-13-29.md)
 *  <code>Apr 20, 2020</code> [Aluminum Cookware and Dishwashers](2020-04-20T13-53-12.md)
 
-[culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
+[culture](./culture), [psychology](./psychology), [go](./go), [language](./language), [grep](./grep), [linux](./linux), [terminal](./terminal), 
 
-<sup><sub>generated 9 May 2020 01:06:33</sub></sup>
+<sup><sub>generated 9 May 2020 01:21:35</sub></sup>

@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -26,9 +25,8 @@ func main() {
 	flag.Parse()
 	if *boolPtr {
 		pages := loadPages()
-
-		tags := buildTagPages(pages)
-		buildIndexPage(pages, tags)
+		tagMap := buildTagPages(pages)
+		buildIndexPage(pages, tagMap)
 
 		fmt.Println("Done")
 		os.Exit(0)
@@ -50,9 +48,8 @@ func main() {
 
 	// And rebuild the index and tag pages
 	pages := loadPages()
-
-	tags := buildTagPages(pages)
-	buildIndexPage(pages, tags)
+	tagMap := buildTagPages(pages)
+	buildIndexPage(pages, tagMap)
 
 	fmt.Println("Done")
 	os.Exit(0)
@@ -60,10 +57,10 @@ func main() {
 
 /* -------------------- Helper functions -------------------- */
 
-func buildIndexPage(pages []*Page, tags []string) {
+func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	content := "A collection of things\n\n"
 
-	// Loop over the pages in reverse, which puts them in reverse-chronological order
+	// Write the page list
 	for _, page := range pages {
 		if page.IsContentPage() {
 			content += fmt.Sprintf("* %s\n", page.Link())
@@ -72,9 +69,8 @@ func buildIndexPage(pages []*Page, tags []string) {
 
 	content += fmt.Sprintf("\n")
 
-	// Loop over the tags in order and create links to those pages
-	sort.Strings(tags)
-	for _, tag := range tags {
+	// Write the tag list
+	for _, tag := range tagMap.SortedTagNames() {
 		content += fmt.Sprintf(
 			"[%s](%s), ",
 			tag,
@@ -82,10 +78,10 @@ func buildIndexPage(pages []*Page, tags []string) {
 		)
 	}
 
+	// Write the footer content
 	content += fmt.Sprintf("\n")
 	content += fmt.Sprintf("\n")
-
-	content += timestamp()
+	content += footer()
 
 	// And write the file to disk
 	err := ioutil.WriteFile("./docs/index.md", []byte(content), 0644)
@@ -94,23 +90,11 @@ func buildIndexPage(pages []*Page, tags []string) {
 	}
 }
 
-// buildTagPages creates the tag pages, with links to posts tagged with those values
-func buildTagPages(pages []*Page) []string {
-	// tags := make(map[string][]*Tag)
-	tagMap := NewTagMap()
+// buildTagPages creates the tag pages, with links to posts tagged with those names
+func buildTagPages(pages []*Page) *TagMap {
+	tagMap := NewTagMap(pages)
 
-	// Sort the pages into tag buckets
-	for _, page := range pages {
-		for _, tag := range page.Tags() {
-			if tag.IsValid() {
-				tagMap.Add(tag)
-			}
-		}
-	}
-
-	tagArr := tagMap.SortedNames()
-
-	for _, tagName := range tagArr {
+	for _, tagName := range tagMap.SortedTagNames() {
 		content := fmt.Sprintf("## %s\n\n", tagName)
 
 		for _, tag := range tagMap.Get(tagName) {
@@ -121,9 +105,9 @@ func buildTagPages(pages []*Page) []string {
 			}
 		}
 
+		// Write the footer content
 		content += fmt.Sprintf("\n")
-
-		content += timestamp()
+		content += footer()
 
 		// And write the file to disk
 		err := ioutil.WriteFile(fmt.Sprintf("./docs/%s.md", tagName), []byte(content), 0644)
@@ -131,14 +115,13 @@ func buildTagPages(pages []*Page) []string {
 			log.Fatal(err)
 		}
 	}
-	return tagArr
+
+	return tagMap
 }
 
 func createNewPage(title string) string {
 	date := time.Now()
 	pathDate := date.Format("2006-01-02T15-04-05") // a custom format that plays nicely with GitHub Pages filename restrictions
-
-	filePath := fmt.Sprintf("./docs/%s-%s.%s", pathDate, strings.ReplaceAll(strings.ToLower(title), " ", "-"), fileExtension)
 
 	// Front matter lives at the top of the generated file and contains bits of info about the file
 	// This is loosely based on the format Hugo uses
@@ -152,6 +135,8 @@ func createNewPage(title string) string {
 	content := frontMatter + fmt.Sprintf("# %s\n\n\n", title)
 
 	// Write out the stub file, explode if we can't do that
+	filePath := fmt.Sprintf("./docs/%s-%s.%s", pathDate, strings.ReplaceAll(strings.ToLower(title), " ", "-"), fileExtension)
+
 	err := ioutil.WriteFile(fmt.Sprintf("%s", filePath), []byte(content), 0644)
 	if err != nil {
 		log.Fatal(err)
@@ -185,7 +170,7 @@ func loadPages() []*Page {
 }
 
 // readPage reads the contents of the page and unmarshals it into the Page struct,
-// making the frontmatter programmatically accessible
+// making the page's internal frontmatter programmatically accessible
 func readPage(filePath string) *Page {
 	page := new(Page)
 
@@ -204,11 +189,11 @@ func readPage(filePath string) *Page {
 	return page
 }
 
-func timestamp() string {
+func footer() string {
 	return fmt.Sprintf("<sup><sub>generated %s</sub></sup>\n", time.Now().Format("2 Jan 2006 15:04:05"))
 }
 
-/* -------------------- Types -------------------- */
+/* -------------------- Page -------------------- */
 
 // Page represents a TIL page
 type Page struct {
@@ -243,7 +228,7 @@ func (page *Page) IsContentPage() bool {
 	return page.Title != ""
 }
 
-// PrettyDate returns a human-friendly representation of the CreatedAt
+// PrettyDate returns a human-friendly representation of the CreatedAt date
 func (page *Page) PrettyDate() string {
 	return page.CreatedAt().Format("Jan 02, 2006")
 }
@@ -259,6 +244,8 @@ func (page *Page) Tags() []*Tag {
 
 	return tags
 }
+
+/* -------------------- Tag -------------------- */
 
 // Tag represents a page tag (e.g.: linux, zombies)
 type Tag struct {
@@ -286,21 +273,38 @@ func (tag *Tag) IsValid() bool {
 	return tag.Name != ""
 }
 
+/* -------------------- TagMap -------------------- */
+
 // TagMap is a map of tag name to Tag instance
 type TagMap struct {
 	Tags map[string][]*Tag
 }
 
-// NewTagMap creates and retusn an instance of TagMap
-func NewTagMap() *TagMap {
-	return &TagMap{
+// NewTagMap creates and returns an instance of TagMap
+func NewTagMap(pages []*Page) *TagMap {
+	tm := &TagMap{
 		Tags: make(map[string][]*Tag),
 	}
+
+	tm.BuildFromPages(pages)
+
+	return tm
 }
 
 // Add adds a Tag instance to the map
 func (tm *TagMap) Add(tag *Tag) {
 	tm.Tags[tag.Name] = append(tm.Tags[tag.Name], tag)
+}
+
+// BuildFromPages populates the tag map from a slice of Page instances
+func (tm *TagMap) BuildFromPages(pages []*Page) {
+	for _, page := range pages {
+		for _, tag := range page.Tags() {
+			if tag.IsValid() {
+				tm.Add(tag)
+			}
+		}
+	}
 }
 
 // Get returns the tags for a given tag name
@@ -313,8 +317,8 @@ func (tm *TagMap) Len() int {
 	return len(tm.Tags)
 }
 
-// SortedNames returns the tag names in alphabetical order
-func (tm *TagMap) SortedNames() []string {
+// SortedTagNames returns the tag names in alphabetical order
+func (tm *TagMap) SortedTagNames() []string {
 	tagArr := make([]string, tm.Len())
 	i := 0
 
