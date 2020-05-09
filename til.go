@@ -58,13 +58,23 @@ func main() {
 /* -------------------- Helper functions -------------------- */
 
 func buildIndexPage(pages []*Page, tagMap *TagMap) {
-	content := "\n\n"
+	content := ""
+	prevPage := &Page{}
 
 	// Write the page list
+	// This is a set of pages listed by month
 	for _, page := range pages {
-		if page.IsContentPage() {
-			content += fmt.Sprintf("* %s\n", page.Link())
+		if !page.IsContentPage() {
+			continue
 		}
+
+		if prevPage.CreatedMonth() != page.CreatedMonth() {
+			content += "\n\n"
+		}
+
+		content += fmt.Sprintf("* %s\n", page.Link())
+
+		prevPage = page
 	}
 
 	content += fmt.Sprintf("\n")
@@ -208,10 +218,19 @@ type Page struct {
 func (page *Page) CreatedAt() time.Time {
 	date, err := time.Parse(time.RFC3339, page.Date)
 	if err != nil {
-		log.Fatal(err)
+		return time.Time{}
 	}
 
 	return date
+}
+
+// CreatedMonth returns the month the page was created
+func (page *Page) CreatedMonth() time.Month {
+	if page.CreatedAt().IsZero() {
+		return 0
+	}
+
+	return page.CreatedAt().Month()
 }
 
 // Link returns a link string suitable for embedding in a Markdown page
