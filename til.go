@@ -28,6 +28,7 @@ func main() {
 	flag.Parse()
 	if *boolPtr {
 		fmt.Println("building pages....")
+		buildIndex()
 		os.Exit(0)
 	}
 
@@ -48,7 +49,7 @@ func main() {
 	content := frontMatter + fmt.Sprintf("# %s\n\n\n", title)
 
 	// Write out the stub file, explode if we can't do that
-	err := ioutil.WriteFile(fmt.Sprintf("./%s", filepath), []byte(content), 0644)
+	err := ioutil.WriteFile(fmt.Sprintf("./docs/%s", filepath), []byte(content), 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,4 +64,20 @@ func main() {
 	// Dump the filepath because this makes it easy to see which file we just created (and delete it, when debugging and testing)
 	fmt.Println(filepath)
 	os.Exit(0)
+}
+
+func buildIndex() {
+	content := "A collection of things I've learned\n"
+
+	content += fmt.Sprintf("\n")
+
+	// files, _ := filepath.Glob("./docs/*.md")
+	// for _, file := range files {
+	// 	content += fmt.Sprintf("* [%s](%s)\n", file, file)
+	// }
+
+	err := ioutil.WriteFile("./docs/index.md", []byte(content), 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
