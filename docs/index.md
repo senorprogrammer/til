@@ -13,4 +13,4 @@ A collection of things
 
 [culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
 
-<sup><sub>generated 9 May 2020 00:39:55</sub></sup>
+<sup><sub>generated 9 May 2020 01:06:33</sub></sup>

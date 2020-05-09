@@ -30,6 +30,7 @@ func main() {
 		tags := buildTagPages(pages)
 		buildIndexPage(pages, tags)
 
+		fmt.Println("Done")
 		os.Exit(0)
 	}
 
@@ -53,8 +54,11 @@ func main() {
 	tags := buildTagPages(pages)
 	buildIndexPage(pages, tags)
 
+	fmt.Println("Done")
 	os.Exit(0)
 }
+
+/* -------------------- Helper functions -------------------- */
 
 func buildIndexPage(pages []*Page, tags []string) {
 	content := "A collection of things\n\n"
@@ -92,34 +96,28 @@ func buildIndexPage(pages []*Page, tags []string) {
 
 // buildTagPages creates the tag pages, with links to posts tagged with those values
 func buildTagPages(pages []*Page) []string {
-	tags := make(map[string][]*Page)
+	// tags := make(map[string][]*Tag)
+	tagMap := NewTagMap()
 
 	// Sort the pages into tag buckets
 	for _, page := range pages {
 		for _, tag := range page.Tags() {
-			tag = strings.TrimSpace(tag)
-
-			if tag != "" {
-				tags[tag] = append(tags[tag], page)
+			if tag.IsValid() {
+				tagMap.Add(tag)
 			}
 		}
 	}
 
-	// Then enumerate over the tags in alphabetical order and create a page for each of them
-	tagArr := make([]string, len(tags))
-	i := 0
+	tagArr := tagMap.SortedNames()
 
-	for tag := range tags {
-		tagArr[i] = tag
-		i++
-	}
+	for _, tagName := range tagArr {
+		content := fmt.Sprintf("## %s\n\n", tagName)
 
-	for _, tag := range tagArr {
-		content := fmt.Sprintf("%s\n\n", tag)
-
-		for _, page := range tags[tag] {
-			if page.IsContentPage() {
-				content += fmt.Sprintf("* %s\n", page.Link())
+		for _, tag := range tagMap.Get(tagName) {
+			for _, page := range tag.Pages {
+				if page.IsContentPage() {
+					content += fmt.Sprintf("* %s\n", page.Link())
+				}
 			}
 		}
 
@@ -128,7 +126,7 @@ func buildTagPages(pages []*Page) []string {
 		content += timestamp()
 
 		// And write the file to disk
-		err := ioutil.WriteFile(fmt.Sprintf("./docs/%s.md", tag), []byte(content), 0644)
+		err := ioutil.WriteFile(fmt.Sprintf("./docs/%s.md", tagName), []byte(content), 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -251,6 +249,79 @@ func (page *Page) PrettyDate() string {
 }
 
 // Tags returns a slice of tags assigned to this page
-func (page *Page) Tags() []string {
-	return strings.Split(page.TagsStr, ",")
+func (page *Page) Tags() []*Tag {
+	tags := []*Tag{}
+
+	names := strings.Split(page.TagsStr, ",")
+	for _, name := range names {
+		tags = append(tags, NewTag(name, page))
+	}
+
+	return tags
+}
+
+// Tag represents a page tag (e.g.: linux, zombies)
+type Tag struct {
+	Name  string
+	Pages []*Page
+}
+
+// NewTag creates and returns an instance of Tag
+func NewTag(name string, page *Page) *Tag {
+	tag := &Tag{
+		Name:  strings.TrimSpace(name),
+		Pages: []*Page{page},
+	}
+
+	return tag
+}
+
+// AddPage adds a page to the list of pages
+func (tag *Tag) AddPage(page *Page) {
+	tag.Pages = append(tag.Pages, page)
+}
+
+// IsValid returns true if this is a valid tag, false if it is not
+func (tag *Tag) IsValid() bool {
+	return tag.Name != ""
+}
+
+// TagMap is a map of tag name to Tag instance
+type TagMap struct {
+	Tags map[string][]*Tag
+}
+
+// NewTagMap creates and retusn an instance of TagMap
+func NewTagMap() *TagMap {
+	return &TagMap{
+		Tags: make(map[string][]*Tag),
+	}
+}
+
+// Add adds a Tag instance to the map
+func (tm *TagMap) Add(tag *Tag) {
+	tm.Tags[tag.Name] = append(tm.Tags[tag.Name], tag)
+}
+
+// Get returns the tags for a given tag name
+func (tm *TagMap) Get(name string) []*Tag {
+	return tm.Tags[name]
+}
+
+// Len returns the number of tags in the map
+func (tm *TagMap) Len() int {
+	return len(tm.Tags)
+}
+
+// SortedNames returns the tag names in alphabetical order
+func (tm *TagMap) SortedNames() []string {
+	tagArr := make([]string, tm.Len())
+	i := 0
+
+	for tag := range tm.Tags {
+		tagArr[i] = tag
+		i++
+	}
+
+	return tagArr
 }
