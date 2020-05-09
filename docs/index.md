@@ -1,4 +1,4 @@
-A collection of things
+
 
 *  <code>May 08, 2020</code> [Gell-Mann Amnesia](2020-05-08T09-08-00-gell-mann-amnesia.md)
 *  <code>May 07, 2020</code> [Genuine Leather](2020-05-07T13-13-08-genuine-leather.md)
@@ -11,6 +11,6 @@ A collection of things
 *  <code>Apr 20, 2020</code> [Another Test](2020-04-20T15-13-29.md)
 *  <code>Apr 20, 2020</code> [Aluminum Cookware and Dishwashers](2020-04-20T13-53-12.md)
 
-[culture](./culture), [psychology](./psychology), [go](./go), [language](./language), [grep](./grep), [linux](./linux), [terminal](./terminal), 
+[go](./go), [language](./language), [grep](./grep), [linux](./linux), [terminal](./terminal), [culture](./culture), [psychology](./psychology), 
 
-<sup><sub>generated 9 May 2020 01:21:35</sub></sup>
+<sup><sub>generated 9 May 2020 02:09:10</sub></sup>

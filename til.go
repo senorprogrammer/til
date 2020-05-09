@@ -58,7 +58,7 @@ func main() {
 /* -------------------- Helper functions -------------------- */
 
 func buildIndexPage(pages []*Page, tagMap *TagMap) {
-	content := "A collection of things\n\n"
+	content := "\n\n"
 
 	// Write the page list
 	for _, page := range pages {
