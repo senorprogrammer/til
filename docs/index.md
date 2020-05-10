@@ -1,5 +1,6 @@
 
 
+*  <code>May 10, 2020</code> [Unnecessary Words](2020-05-10T09-44-37-unnecessary-words.md)
 *  <code>May 08, 2020</code> [Gell-Mann Amnesia](2020-05-08T09-08-00-gell-mann-amnesia.md)
 *  <code>May 07, 2020</code> [Genuine Leather](2020-05-07T13-13-08-genuine-leather.md)
 *  <code>May 07, 2020</code> [IP Address Int to Dotted Quad](2020-05-07T10-14-06-ip-address-int-to-dotted-quad.md)
@@ -16,6 +17,6 @@
 
 *  <code>Mar 30, 2020</code> [First Post](2020-03-30T11-11-11-first-post.md)
 
-[go](./go), [language](./language), [grep](./grep), [linux](./linux), [terminal](./terminal), [culture](./culture), [psychology](./psychology), 
+[culture](./culture), [psychology](./psychology), [go](./go), [grep](./grep), [linux](./linux), [terminal](./terminal), [language](./language), 
 
-<sup><sub>generated 9 May 2020 09:42:28</sub></sup>
+<sup><sub>generated 10 May 2020 09:45:19</sub></sup>
