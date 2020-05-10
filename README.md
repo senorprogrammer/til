@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./till.jpg?raw=true" title="till" alt="WTF" width="400" height="202" />
+    <img src="./till.jpg?raw=true" title="till" alt="WTF" width="400" height="200" />
 </p>
 
 # til
@@ -26,7 +26,7 @@ You could also:
 
 ## Usage
 
-### Create a new page
+### Creating a new page
 
 ```bash
 ❯ til Testing title
@@ -35,10 +35,20 @@ You could also:
 
 And then that page will open in [MacVim](https://macvim-dev.github.io/macvim/).
 
-### Build the static pages
+### Building static pages
 
 ```bash
 ❯ til -build
 ```
+
+Builds the index and tag pages.
+
+### Saving all
+
+```bash
+❯ til -save
+```
+
+Builds the index and tag pages, commits everything to the git repo with a generic commit message, and pushes it all up to the remote repo.
 
 And now the static pages are ready for committing up to GitHub. For example: [https://senorprogrammer.github.io/til/](https://senorprogrammer.github.io/til/).

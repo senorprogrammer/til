@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	commitMsg = "build and save"
-
+	// Used in the auto-generated commit message when -save is used
+	commitMsg     = "build, save, push"
 	commiterName  = "Chris Cummer"
 	commiterEmail = "chriscummer@me.com"
 
