@@ -1,5 +1,7 @@
 
 
+*  <code>May 10, 2020</code> [Test](2020-05-10T10-35-47-test.md)
+*  <code>May 10, 2020</code> [Test](2020-05-10T10-34-59-test.md)
 *  <code>May 10, 2020</code> [Unnecessary Words](2020-05-10T09-44-37-unnecessary-words.md)
 *  <code>May 08, 2020</code> [Gell-Mann Amnesia](2020-05-08T09-08-00-gell-mann-amnesia.md)
 *  <code>May 07, 2020</code> [Genuine Leather](2020-05-07T13-13-08-genuine-leather.md)
@@ -17,6 +19,6 @@
 
 *  <code>Mar 30, 2020</code> [First Post](2020-03-30T11-11-11-first-post.md)
 
-[culture](./culture), [psychology](./psychology), [go](./go), [grep](./grep), [linux](./linux), [terminal](./terminal), [language](./language), 
+[go](./go), [grep](./grep), [linux](./linux), [terminal](./terminal), [language](./language), [culture](./culture), [psychology](./psychology), 
 
-<sup><sub>generated 10 May 2020 09:45:19</sub></sup>
+<sup><sub>generated 10 May 2020 10:35:47</sub></sup>

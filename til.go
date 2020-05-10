@@ -17,7 +17,32 @@ import (
 const (
 	editor        = "mvim"
 	fileExtension = "md"
+
+	// a custom datetime format that plays nicely with GitHub Pages filename restrictions
+	ghFriendlyDateFormat = "2006-01-02T15-04-05"
+
+	/* -------------------- Messages -------------------- */
+
+	errNoTitle = "title must not be blank"
+
+	statusDone     = "done"
+	statusIdxBuild = "building index page"
+	statusTagBuild = "building tag pages"
 )
+
+var (
+	// Green writes green text
+	Green = Colour("\033[1;32m%s\033[0m")
+
+	// Red writes red text
+	Red = Colour("\033[1;31m%s\033[0m")
+)
+
+func init() {
+	log.SetOutput(os.Stderr)
+	log.SetOutput(os.Stdout)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 func main() {
 	// If the -build flag is set, we're not creating a new page, we're rebuilding the index and tag pages
@@ -28,15 +53,14 @@ func main() {
 		tagMap := buildTagPages(pages)
 		buildIndexPage(pages, tagMap)
 
-		fmt.Println("Done")
+		log.Print(statusDone)
 		os.Exit(0)
 	}
 
 	// Every non-dash argument is considered a part of the title. If there are no arguments, we have no title
 	// Can't have a page without a title
 	if len(os.Args[1:]) < 1 {
-		fmt.Println("Must have a title")
-		os.Exit(1)
+		log.Fatal(Red(errNoTitle))
 	}
 
 	title := strings.Title(strings.Join(os.Args[1:], " "))
@@ -44,20 +68,22 @@ func main() {
 	filePath := createNewPage(title)
 
 	// Write the filepath to the console. This makes it easy to know which file we just created
-	fmt.Println(filePath)
+	log.Print(fmt.Sprintf("%s %s", Green("->"), filePath))
 
 	// And rebuild the index and tag pages
 	pages := loadPages()
 	tagMap := buildTagPages(pages)
 	buildIndexPage(pages, tagMap)
 
-	fmt.Println("Done")
+	log.Print(statusDone)
 	os.Exit(0)
 }
 
 /* -------------------- Helper functions -------------------- */
 
 func buildIndexPage(pages []*Page, tagMap *TagMap) {
+	log.Print(statusIdxBuild)
+
 	content := ""
 	prevPage := &Page{}
 
@@ -95,7 +121,7 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	content += footer()
 
 	// And write the file to disk
-	err := ioutil.WriteFile("./docs/index.md", []byte(content), 0644)
+	err := ioutil.WriteFile(fmt.Sprintf("./docs/index.%s", fileExtension), []byte(content), 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -103,6 +129,8 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 
 // buildTagPages creates the tag pages, with links to posts tagged with those names
 func buildTagPages(pages []*Page) *TagMap {
+	log.Print(statusTagBuild)
+
 	tagMap := NewTagMap(pages)
 
 	for _, tagName := range tagMap.SortedTagNames() {
@@ -121,7 +149,11 @@ func buildTagPages(pages []*Page) *TagMap {
 		content += footer()
 
 		// And write the file to disk
-		err := ioutil.WriteFile(fmt.Sprintf("./docs/%s.md", tagName), []byte(content), 0644)
+		fileName := fmt.Sprintf("./docs/%s.%s", tagName, fileExtension)
+
+		log.Print(fmt.Sprintf("%s %s\n", Green("->"), fileName))
+
+		err := ioutil.WriteFile(fileName, []byte(content), 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -132,7 +164,7 @@ func buildTagPages(pages []*Page) *TagMap {
 
 func createNewPage(title string) string {
 	date := time.Now()
-	pathDate := date.Format("2006-01-02T15-04-05") // a custom format that plays nicely with GitHub Pages filename restrictions
+	pathDate := date.Format(ghFriendlyDateFormat)
 
 	// Front matter lives at the top of the generated file and contains bits of info about the file
 	// This is loosely based on the format Hugo uses
@@ -168,7 +200,7 @@ func createNewPage(title string) string {
 func loadPages() []*Page {
 	pages := []*Page{}
 
-	filePaths, _ := filepath.Glob("./docs/*.md")
+	filePaths, _ := filepath.Glob(fmt.Sprintf("./docs/*.%s", fileExtension))
 
 	for i := len(filePaths) - 1; i >= 0; i-- {
 		file := filePaths[i]
@@ -198,6 +230,17 @@ func readPage(filePath string) *Page {
 	page.FilePath = filePath
 
 	return page
+}
+
+/* -------------------- Helper Functions -------------------- */
+
+// Colour returns a function that defines a printable colour string
+func Colour(colorString string) func(...interface{}) string {
+	sprint := func(args ...interface{}) string {
+		return fmt.Sprintf(colorString,
+			fmt.Sprint(args...))
+	}
+	return sprint
 }
 
 func footer() string {
