@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,9 +13,16 @@ import (
 	"time"
 
 	"github.com/ericaro/frontmatter"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 const (
+	commitMsg = "build and save"
+
+	commiterName  = "Chris Cummer"
+	commiterEmail = "chriscummer@me.com"
+
 	editor        = "mvim"
 	fileExtension = "md"
 
@@ -31,11 +39,17 @@ const (
 )
 
 var (
+	// Blue writes blue text
+	Blue = Colour("\033[1;36m%s\033[0m")
+
 	// Green writes green text
 	Green = Colour("\033[1;32m%s\033[0m")
 
 	// Red writes red text
 	Red = Colour("\033[1;31m%s\033[0m")
+
+	// Yellow writes yellow text
+	Yellow = Colour("\033[1;33m%s\033[0m")
 )
 
 func init() {
@@ -46,12 +60,25 @@ func init() {
 
 func main() {
 	// If the -build flag is set, we're not creating a new page, we're rebuilding the index and tag pages
-	boolPtr := flag.Bool("build", false, "builds the index and tag pages")
+	buildPtr := flag.Bool("build", false, "builds the index and tag pages")
+
+	// If the -save flag is set, we're saving newly-created pages, rebuilding everything, and then pushing
+	// up to the remote remote
+	savePtr := flag.Bool("save", false, "saves, builds, and pushes")
+
 	flag.Parse()
-	if *boolPtr {
-		pages := loadPages()
-		tagMap := buildTagPages(pages)
-		buildIndexPage(pages, tagMap)
+
+	if *buildPtr {
+		build()
+
+		log.Print(statusDone)
+		os.Exit(0)
+	}
+
+	if *savePtr {
+		build()
+		save()
+		push()
 
 		log.Print(statusDone)
 		os.Exit(0)
@@ -60,7 +87,7 @@ func main() {
 	// Every non-dash argument is considered a part of the title. If there are no arguments, we have no title
 	// Can't have a page without a title
 	if len(os.Args[1:]) < 1 {
-		log.Fatal(Red(errNoTitle))
+		Fail(errors.New(errNoTitle))
 	}
 
 	title := strings.Title(strings.Join(os.Args[1:], " "))
@@ -68,7 +95,7 @@ func main() {
 	filePath := createNewPage(title)
 
 	// Write the filepath to the console. This makes it easy to know which file we just created
-	log.Print(fmt.Sprintf("%s %s", Green("->"), filePath))
+	log.Print(fmt.Sprintf("%s %s", Blue("\t->"), filePath))
 
 	// And rebuild the index and tag pages
 	pages := loadPages()
@@ -81,8 +108,14 @@ func main() {
 
 /* -------------------- Helper functions -------------------- */
 
+func build() {
+	pages := loadPages()
+	tagMap := buildTagPages(pages)
+	buildIndexPage(pages, tagMap)
+}
+
 func buildIndexPage(pages []*Page, tagMap *TagMap) {
-	log.Print(statusIdxBuild)
+	Info(statusIdxBuild)
 
 	content := ""
 	prevPage := &Page{}
@@ -123,13 +156,13 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	// And write the file to disk
 	err := ioutil.WriteFile(fmt.Sprintf("./docs/index.%s", fileExtension), []byte(content), 0644)
 	if err != nil {
-		log.Fatal(err)
+		Fail(err)
 	}
 }
 
 // buildTagPages creates the tag pages, with links to posts tagged with those names
 func buildTagPages(pages []*Page) *TagMap {
-	log.Print(statusTagBuild)
+	Info(statusTagBuild)
 
 	tagMap := NewTagMap(pages)
 
@@ -151,11 +184,11 @@ func buildTagPages(pages []*Page) *TagMap {
 		// And write the file to disk
 		fileName := fmt.Sprintf("./docs/%s.%s", tagName, fileExtension)
 
-		log.Print(fmt.Sprintf("%s %s\n", Green("->"), fileName))
+		log.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
 
 		err := ioutil.WriteFile(fileName, []byte(content), 0644)
 		if err != nil {
-			log.Fatal(err)
+			Fail(err)
 		}
 	}
 
@@ -182,14 +215,14 @@ func createNewPage(title string) string {
 
 	err := ioutil.WriteFile(fmt.Sprintf("%s", filePath), []byte(content), 0644)
 	if err != nil {
-		log.Fatal(err)
+		Fail(err)
 	}
 
 	// And open the file for editing, exploding if we can't do that
 	cmd := exec.Command(editor, filePath)
 	err = cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		Fail(err)
 	}
 
 	return filePath
@@ -212,6 +245,21 @@ func loadPages() []*Page {
 	return pages
 }
 
+// push pushes up to the remote git repo
+func push() {
+	Info("pushing to remote")
+
+	r, err := git.PlainOpen(".")
+	if err != nil {
+		Fail(err)
+	}
+
+	err = r.Push(&git.PushOptions{})
+	if err != nil {
+		Fail(err)
+	}
+}
+
 // readPage reads the contents of the page and unmarshals it into the Page struct,
 // making the page's internal frontmatter programmatically accessible
 func readPage(filePath string) *Page {
@@ -219,17 +267,56 @@ func readPage(filePath string) *Page {
 
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatal(err)
+		Fail(err)
 	}
 
 	err = frontmatter.Unmarshal(([]byte)(data), page)
 	if err != nil {
-		log.Fatal(err)
+		Fail(err)
 	}
 
 	page.FilePath = filePath
 
 	return page
+}
+
+func save() {
+	// https://github.com/go-git/go-git/blob/master/_examples/commit/main.go
+
+	Info("saving uncommitted files")
+
+	r, err := git.PlainOpen(".")
+	if err != nil {
+		Fail(err)
+	}
+
+	w, err := r.Worktree()
+	if err != nil {
+		Fail(err)
+	}
+
+	_, err = w.Add(".")
+	if err != nil {
+		Fail(err)
+	}
+
+	commit, err := w.Commit(commitMsg, &git.CommitOptions{
+		Author: &object.Signature{
+			Name:  commiterName,
+			Email: commiterEmail,
+			When:  time.Now(),
+		},
+	})
+	if err != nil {
+		Fail(err)
+	}
+
+	obj, err := r.CommitObject(commit)
+	if err != nil {
+		Fail(err)
+	}
+
+	Info(obj.Message)
 }
 
 /* -------------------- Helper Functions -------------------- */
@@ -241,6 +328,16 @@ func Colour(colorString string) func(...interface{}) string {
 			fmt.Sprint(args...))
 	}
 	return sprint
+}
+
+// Fail writes out an error message
+func Fail(err error) {
+	log.Fatal(fmt.Sprintf("%s %s", Red("x"), err.Error()))
+}
+
+// Info writes out an informative message
+func Info(msg string) {
+	log.Print(fmt.Sprintf("%s %s", Green("->"), msg))
 }
 
 func footer() string {
