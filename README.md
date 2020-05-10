@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="./till.jpg?raw=true" title="till" alt="WTF" width="400" height="202" />
+</p>
+
 # til
 
 A place to keep track of things I've learned that don't warrant a blog post.
