@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -26,7 +27,7 @@ const (
 	editor        = "mvim"
 	fileExtension = "md"
 
-	// a custom datetime format that plays nicely with GitHub Pages filename restrictions
+	// A custom datetime format that plays nicely with GitHub Pages filename restrictions
 	ghFriendlyDateFormat = "2006-01-02T15-04-05"
 
 	/* -------------------- Messages -------------------- */
@@ -65,7 +66,7 @@ func main() {
 	buildPtr := flag.Bool("build", false, "builds the index and tag pages")
 
 	// If the -save flag is set, we're saving newly-created pages, rebuilding everything, and then pushing
-	// up to the remote remote
+	// up to the remote repo
 	savePtr := flag.Bool("save", false, "saves, builds, and pushes")
 
 	flag.Parse()
@@ -455,6 +456,10 @@ func NewTagMap(pages []*Page) *TagMap {
 
 // Add adds a Tag instance to the map
 func (tm *TagMap) Add(tag *Tag) {
+	if !tag.IsValid() {
+		return
+	}
+
 	tm.Tags[tag.Name] = append(tm.Tags[tag.Name], tag)
 }
 
@@ -462,9 +467,7 @@ func (tm *TagMap) Add(tag *Tag) {
 func (tm *TagMap) BuildFromPages(pages []*Page) {
 	for _, page := range pages {
 		for _, tag := range page.Tags() {
-			if tag.IsValid() {
-				tm.Add(tag)
-			}
+			tm.Add(tag)
 		}
 	}
 }
@@ -488,6 +491,8 @@ func (tm *TagMap) SortedTagNames() []string {
 		tagArr[i] = tag
 		i++
 	}
+
+	sort.Strings(tagArr)
 
 	return tagArr
 }
