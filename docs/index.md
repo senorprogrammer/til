@@ -19,4 +19,4 @@
 
 [culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
 
-<sup><sub>generated 10 May 2020 23:23:56</sub></sup>
+<sup><sub>generated 11 May 2020 00:12:53 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>

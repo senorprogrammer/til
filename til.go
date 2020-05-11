@@ -344,7 +344,10 @@ func Info(msg string) {
 }
 
 func footer() string {
-	return fmt.Sprintf("<sup><sub>generated %s</sub></sup>\n", time.Now().Format("2 Jan 2006 15:04:05"))
+	return fmt.Sprintf(
+		"<sup><sub>generated %s by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>\n",
+		time.Now().Format("2 Jan 2006 15:04:05"),
+	)
 }
 
 /* -------------------- Page -------------------- */
