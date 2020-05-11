@@ -25,7 +25,7 @@ You could also:
 * create the `docs` directory: `mkdir docs`
 * push that up to GitHub
 
-**Note:** Don't forget to change the `commiterName` and `commiterEmail` constants to your own values. And if you don't use MacVim, change `editor` as well.
+**Note:** Don't forget to change the `commiterName` and `commiterEmail` constants in `til.go` to your own values. And if you don't use MacVim, change `editor` as well.
 
 ## Usage
 
