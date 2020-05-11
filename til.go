@@ -123,6 +123,15 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	content := ""
 	prevPage := &Page{}
 
+	// Write the tag list
+	for _, tag := range tagMap.SortedTagNames() {
+		content += fmt.Sprintf(
+			"[%s](%s), ",
+			tag,
+			fmt.Sprintf("./%s", tag),
+		)
+	}
+
 	// Write the page list
 	// This is a set of pages listed by month
 	for _, page := range pages {
@@ -141,15 +150,6 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	}
 
 	content += fmt.Sprintf("\n")
-
-	// Write the tag list
-	for _, tag := range tagMap.SortedTagNames() {
-		content += fmt.Sprintf(
-			"[%s](%s), ",
-			tag,
-			fmt.Sprintf("./%s", tag),
-		)
-	}
 
 	// Write the footer content
 	content += fmt.Sprintf("\n")

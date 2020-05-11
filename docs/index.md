@@ -1,4 +1,4 @@
-
+[culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
 
 * <code>May 10, 2020</code> [Unnecessary Words](2020-05-10T09-44-37-unnecessary-words.md)
 * <code>May 08, 2020</code> [Gell-Mann Amnesia](2020-05-08T09-08-00-gell-mann-amnesia.md)
@@ -17,6 +17,6 @@
 
 * <code>Mar 30, 2020</code> [First Post](2020-03-30T11-11-11-first-post.md)
 
-[culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
 
-<sup><sub>generated 11 May 2020 00:12:53 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
+
+<sup><sub>generated 11 May 2020 00:15:19 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
