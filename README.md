@@ -54,4 +54,4 @@ Builds the index and tag pages.
 
 Builds the index and tag pages, commits everything to the git repo with a generic commit message, and pushes it all up to the remote repo.
 
-And now the static pages are ready for committing up to GitHub. For example: [https://senorprogrammer.github.io/til/](https://senorprogrammer.github.io/til/).
+For example: [https://senorprogrammer.github.io/til/](https://senorprogrammer.github.io/til/).
