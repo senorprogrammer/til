@@ -23,6 +23,9 @@ You could also:
 * create your own empty git repo
 * copy `til.go` into it
 * create the `docs` directory: `mkdir docs`
+* push that up to GitHub
+
+**Note:** Don't forget to change the `commiterName` and `commiterEmail` constants to your own values. And if you don't use MacVim, change `editor` as well.
 
 ## Usage
 
