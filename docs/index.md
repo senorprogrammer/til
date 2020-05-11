@@ -1,5 +1,7 @@
 
 
+* <code>May 10, 2020</code> [This Is A Test](2020-05-10T20-46-19-this-is-a-test.md)
+* <code>May 10, 2020</code> [This Is A Test](2020-05-10T20-44-34-this-is-a-test.md)
 * <code>May 10, 2020</code> [Unnecessary Words](2020-05-10T09-44-37-unnecessary-words.md)
 * <code>May 08, 2020</code> [Gell-Mann Amnesia](2020-05-08T09-08-00-gell-mann-amnesia.md)
 * <code>May 07, 2020</code> [Genuine Leather](2020-05-07T13-13-08-genuine-leather.md)
@@ -19,4 +21,4 @@
 
 [culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
 
-<sup><sub>generated 10 May 2020 12:03:08</sub></sup>
+<sup><sub>generated 10 May 2020 20:46:19</sub></sup>

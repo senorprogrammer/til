@@ -98,7 +98,7 @@ func main() {
 	filePath := createNewPage(title)
 
 	// Write the filepath to the console. This makes it easy to know which file we just created
-	log.Print(fmt.Sprintf("%s %s", Blue("\t->"), filePath))
+	log.Print(fmt.Sprintf("%s %s", Green("->"), filePath))
 
 	// And rebuild the index and tag pages
 	pages := loadPages()
