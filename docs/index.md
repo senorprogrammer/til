@@ -1,5 +1,7 @@
 [astronomy](./astronomy), [culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
 
+* <code>May 11, 2020</code> [Ptal](2020-05-11T15-04-57-ptal.md)
+* <code>May 11, 2020</code> [Go Table Test Structure](2020-05-11T10-42-26-go-table-test-structure.md)
 * <code>May 11, 2020</code> [Measuring Stars Above The Horizon](2020-05-11T00-17-00-measuring-stars-above-the-horizon.md)
 * <code>May 10, 2020</code> [Unnecessary Words](2020-05-10T09-44-37-unnecessary-words.md)
 * <code>May 08, 2020</code> [Gell-Mann Amnesia](2020-05-08T09-08-00-gell-mann-amnesia.md)
@@ -20,4 +22,4 @@
 
 
 
-<sup><sub>generated 11 May 2020 00:18:15 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
+<sup><sub>generated 11 May 2020 15:26:27 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
