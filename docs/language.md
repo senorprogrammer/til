@@ -5,4 +5,4 @@
 * <code>May 07, 2020</code> [Silviculture](2020-05-07T10-06-23-silviculture.md)
 * <code>Apr 28, 2020</code> [Kakistocracy](2020-04-28T21-52-07-kakistocracy.md)
 
-<sup><sub>generated 12 May 2020 15:11:37 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
+<sup><sub>generated 12 May 2020 15:16:37 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
