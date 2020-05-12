@@ -539,6 +539,11 @@ func (page *Page) CreatedMonth() time.Month {
 	return page.CreatedAt().Month()
 }
 
+// IsContentPage returns true if the page is a valid entry page, false if it is not
+func (page *Page) IsContentPage() bool {
+	return page.Title != ""
+}
+
 // Link returns a link string suitable for embedding in a Markdown page
 func (page *Page) Link() string {
 	return fmt.Sprintf(
@@ -546,11 +551,6 @@ func (page *Page) Link() string {
 		page.PrettyDate(),
 		page.Title,
 		strings.Replace(page.FilePath, "docs/", "", -1))
-}
-
-// IsContentPage returns true if the page is a valid entry page, false if it is not
-func (page *Page) IsContentPage() bool {
-	return page.Title != ""
 }
 
 // PrettyDate returns a human-friendly representation of the CreatedAt date
