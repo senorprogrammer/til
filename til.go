@@ -74,13 +74,15 @@ var (
 // no friends working on this, there's no one around to stop me)
 var globalConfig *config.Config
 
+// ll is a go routine-safe implementation of Logger
+// (More globals! This is getting crazy)
+var ll *log.Logger
+
 var buildFlag bool
 var saveFlag bool
 
 func init() {
-	log.SetOutput(os.Stderr)
-	log.SetOutput(os.Stdout)
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	ll = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 
 	flag.BoolVar(&buildFlag, "b", false, "builds the index and tag pages (short-hand)")
 	flag.BoolVar(&buildFlag, "build", false, "builds the index and tag pages")
@@ -90,6 +92,7 @@ func init() {
 }
 
 func main() {
+
 	loadConfig()
 
 	/* Flags */
@@ -123,7 +126,7 @@ func main() {
 	pagePath := createNewPage(title)
 
 	// Write the pagePath to the console. This makes it easy to know which file we just created
-	log.Print(fmt.Sprintf("%s %s", Green("->"), pagePath))
+	Info(pagePath)
 
 	// And rebuild the index and tag pages
 	build()
@@ -300,7 +303,7 @@ func buildTagPages(pages []*Page) *TagMap {
 	for _, tagName := range tagMap.SortedTagNames() {
 		wGroup.Add(1)
 
-		go func(tagName string) {
+		go func(tagName string, ll *log.Logger) {
 			defer wGroup.Done()
 
 			content := fmt.Sprintf("## %s\n\n", tagName)
@@ -325,8 +328,8 @@ func buildTagPages(pages []*Page) *TagMap {
 				Fail(err)
 			}
 
-			log.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
-		}(tagName)
+			ll.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
+		}(tagName, ll)
 	}
 
 	wGroup.Wait()
@@ -487,17 +490,17 @@ func Colour(colorString string) func(...interface{}) string {
 
 // Fail writes out an error message
 func Fail(err error) {
-	log.Fatal(fmt.Sprintf("%s %s", Red("x"), err.Error()))
+	ll.Fatal(fmt.Sprintf("%s %s", Red("✘"), err.Error()))
 }
 
 // Info writes out an informative message
 func Info(msg string) {
-	log.Print(fmt.Sprintf("%s %s", Green("->"), msg))
+	ll.Print(fmt.Sprintf("%s %s", Green("->"), msg))
 }
 
 // Victory writes out a victorious final message and then expires dramatically
 func Victory(msg string) {
-	log.Print(msg)
+	ll.Print(fmt.Sprintf("%s %s", Green("✓"), msg))
 	os.Exit(0)
 }
 
