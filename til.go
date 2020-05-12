@@ -24,11 +24,10 @@ const (
 	tilConfigDir  = "~/.config/til/"
 	tilConfigFile = "config.yml"
 
-	defaultConfig = `
---- 
+	defaultConfig = `--- 
 commitMessage: "build, save, push"
-commiterEmail: test@example.com
-commiterName: "Change Me"
+committerEmail: test@example.com
+committerName: "Change Me"
 editor: "mvim"
 `
 
@@ -69,8 +68,8 @@ var (
 )
 
 // globalConfig holds and makes available all the user-configurable
-// settings that are stored in the config file
-// (I know! Friends don't let friends use globals, but as I have
+// settings that are stored in the config file.
+// (I know! Friends don't let friends use globals, but since I have
 // no friends working on this, there's no one around to stop me)
 var globalConfig *config.Config
 
@@ -94,18 +93,14 @@ func main() {
 
 	if *buildPtr {
 		build()
-
-		log.Print(statusDone)
-		os.Exit(0)
+		Victory(statusDone)
 	}
 
 	if *savePtr {
 		build()
 		save()
 		push()
-
-		log.Print(statusDone)
-		os.Exit(0)
+		Victory(statusDone)
 	}
 
 	// Every non-dash argument is considered a part of the title. If there are no arguments, we have no title
@@ -126,14 +121,20 @@ func main() {
 	tagMap := buildTagPages(pages)
 	buildIndexPage(pages, tagMap)
 
-	log.Print(statusDone)
-	os.Exit(0)
+	Victory(statusDone)
 }
 
 /* -------------------- Configuration -------------------- */
 
+func loadConfig() {
+	makeConfigDir()
+	makeConfigFile()
+	readConfigFile()
+}
+
 // getConfigDir returns the string path to the directory that should
-// contain the configuration file
+// contain the configuration file.
+// It tries to be XDG-compatible
 func getConfigDir() string {
 	cDir := os.Getenv("XDG_CONFIG_HOME")
 	if cDir == "" {
@@ -166,12 +167,6 @@ func getConfigPath() string {
 	return cPath
 }
 
-func loadConfig() {
-	makeConfigDir()
-	makeConfigFile()
-	readConfigFile()
-}
-
 // Be XDG-compatible yo
 // https://wiki.archlinux.org/index.php/XDG_Base_Directory
 func makeConfigDir() {
@@ -191,30 +186,33 @@ func makeConfigFile() {
 	fileInfo, err := os.Stat(cPath)
 
 	if err != nil {
-		// Uh oh, something went wrong trying to find the config file.
+		// Something went wrong trying to find the config file.
 		// Let's see if we can figure out what happened
 		if os.IsNotExist(err) {
 			// Ah, the config file does not exist, which is probably fine
 			_, err = os.Create(cPath)
 			if err != nil {
+				// That was not fine
 				Fail(errors.New(errConfigFileCreate))
 			}
 		} else {
 			// But wait, it's some kind of other error. What kind?
-			// I dunno, but it probably means we shouldn't continue, so...
+			// I dunno, but it's probably bad so die
 			Fail(err)
 		}
 	}
 
 	// Let's double-check that the file's there now (and because there's
-	// a pretty good chance the earlier fileInfo doesn't exist)
+	// a pretty good chance the earlier fileInfo is nil, even though the
+	// file should now exist)
 	fileInfo, err = os.Stat(cPath)
 	if err != nil {
 		Fail(errors.New(errConfigFileAssert))
 	}
 
-	// Anyhow, we made it this far so now we should write the default config
-	// but only if the file is empty
+	// We made it this far so now we should write the default config
+	// but only if the file is empty. Don't want to stop on any non-default
+	// values the user has written in there
 	if fileInfo.Size() == 0 {
 		if ioutil.WriteFile(cPath, []byte(defaultConfig), 0600) != nil {
 			Fail(errors.New(errConfigFileWrite))
@@ -222,6 +220,8 @@ func makeConfigFile() {
 	}
 }
 
+// readConfigFile reads the contents of the config file and jams them
+// into the global config variable
 func readConfigFile() {
 	cPath := getConfigPath()
 
@@ -432,9 +432,10 @@ func save() {
 	}
 
 	commitMsg, err1 := globalConfig.String("commitMessage")
-	commitEmail, err2 := globalConfig.String("commitEmail")
-	commitName, err3 := globalConfig.String("commitName")
+	commitEmail, err2 := globalConfig.String("committerEmail")
+	commitName, err3 := globalConfig.String("committerName")
 	if err1 != nil || err2 != nil || err3 != nil {
+		fmt.Printf("%s | %s | %s\n", commitMsg, commitEmail, commitName)
 		Fail(errors.New(errConfigValueRead))
 	}
 
@@ -476,6 +477,12 @@ func Fail(err error) {
 // Info writes out an informative message
 func Info(msg string) {
 	log.Print(fmt.Sprintf("%s %s", Green("->"), msg))
+}
+
+// Victory writes out a victorious final message and then expires dramatically
+func Victory(msg string) {
+	log.Print(msg)
+	os.Exit(0)
 }
 
 func footer() string {
