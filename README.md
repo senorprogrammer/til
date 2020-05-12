@@ -43,6 +43,16 @@ Open `~/.config/til/config.yml`, change the following, and save:
 
 `editor` is the text editor it will open for writing in when running `til [some title here]`.
 
+### Example
+
+```
+---
+commitMessage: "build, save, push"
+committerEmail: test@example.com
+committerName: "TIL Autobot"
+editor: "mvim"
+```
+
 ## Execution
 
 I use this `zsh` alias to execute it from whichever directory I'm in:
