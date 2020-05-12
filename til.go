@@ -472,7 +472,7 @@ func save(commitMsg string) {
 		Fail(err)
 	}
 
-	Info(fmt.Sprintf("committed with '%s' (%7s)", obj.Message, obj.Hash.String()))
+	Info(fmt.Sprintf("committed with '%s' (%.7s)", obj.Message, obj.Hash.String()))
 }
 
 /* -------------------- More Helper Functions -------------------- */
