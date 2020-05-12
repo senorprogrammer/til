@@ -39,7 +39,9 @@ Open `~/.config/til/config.yml`, change the following, and save:
     * committerName
     * editor
     
-`committerEmail` and `committerName` are the values it will use when committing against the repo when running `til -build`. `editor` is the text editor it will open for writing in when running `til [some title here]`.
+`committerEmail` and `committerName` are the values it will use to commit with when running `til -build`. 
+
+`editor` is the text editor it will open for writing in when running `til [some title here]`.
 
 ## Usage
 
