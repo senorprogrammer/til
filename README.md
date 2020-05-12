@@ -55,7 +55,7 @@ I don't bother to compile/install it, it's fast enough as-is. However, `go insta
 
 ## Usage
 
-`til` only has three commands: empty, -build, and -save.
+`til` only has three usage options: `til`, `til -build`, and `til -save`.
 
 ### Creating a new page
 
