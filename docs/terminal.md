@@ -2,4 +2,4 @@
 
 * <code>May 04, 2020</code> [Case-Insensitive Grep - Again](2020-05-04T11-44-37-case-insensitive-grep---again.md)
 
-<sup><sub>generated 12 May 2020 02:47:12 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
+<sup><sub>generated 12 May 2020 02:58:34 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>

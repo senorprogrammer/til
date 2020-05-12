@@ -1,6 +1,5 @@
 [astronomy](./astronomy), [culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
 
-* <code>May 12, 2020</code> [Another Test](2020-05-12T02-47-11-another-test.md)
 * <code>May 11, 2020</code> [iTerm2 Tab Stops Setting](2020-05-11T22-49-48-iterm2-tab-stops-setting.md)
 * <code>May 11, 2020</code> [PTAL](2020-05-11T15-04-57-ptal.md)
 * <code>May 11, 2020</code> [Go Table Test Structure](2020-05-11T10-42-26-go-table-test-structure.md)
@@ -24,4 +23,4 @@
 
 
 
-<sup><sub>generated 12 May 2020 02:47:12 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
+<sup><sub>generated 12 May 2020 02:58:34 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>

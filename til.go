@@ -84,8 +84,8 @@ func init() {
 	flag.BoolVar(&buildFlag, "b", false, "builds the index and tag pages (short-hand)")
 	flag.BoolVar(&buildFlag, "build", false, "builds the index and tag pages")
 
-	flag.BoolVar(&buildFlag, "s", false, "builds, saves, and pushes (short-hand)")
-	flag.BoolVar(&buildFlag, "save", false, "builds, saves, and pushes")
+	flag.BoolVar(&saveFlag, "s", false, "builds, saves, and pushes (short-hand)")
+	flag.BoolVar(&saveFlag, "save", false, "builds, saves, and pushes")
 }
 
 func main() {
@@ -106,9 +106,11 @@ func main() {
 	}
 
 	if saveFlag {
+		commitMsg := strings.Join(os.Args[2:], " ")
+
 		build()
-		save()
-		push()
+		save(commitMsg)
+		// push()
 		Victory(statusDone)
 	}
 
@@ -422,7 +424,7 @@ func readPage(filePath string) *Page {
 }
 
 // https://github.com/go-git/go-git/blob/master/_examples/commit/main.go
-func save() {
+func save(commitMsg string) {
 	Info(statusRepoSave)
 
 	r, err := git.PlainOpen(".")
@@ -440,18 +442,24 @@ func save() {
 		Fail(err)
 	}
 
-	commitMsg, err1 := globalConfig.String("commitMessage")
-	commitEmail, err2 := globalConfig.String("committerEmail")
-	commitName, err3 := globalConfig.String("committerName")
+	defaultCommitMsg, err1 := globalConfig.String("commitMessage")
+	defaultCommitEmail, err2 := globalConfig.String("committerEmail")
+	defaultCommitName, err3 := globalConfig.String("committerName")
 	if err1 != nil || err2 != nil || err3 != nil {
-		fmt.Printf("%s | %s | %s\n", commitMsg, commitEmail, commitName)
 		Fail(errors.New(errConfigValueRead))
+	}
+
+	if commitMsg == "" {
+		// The incoming commitMsg is optional (if it is set, it probably came in
+		// via command line args on -save). If it isn't set, we use the default
+		// from the config file instead
+		commitMsg = defaultCommitMsg
 	}
 
 	commit, err := w.Commit(commitMsg, &git.CommitOptions{
 		Author: &object.Signature{
-			Name:  commitEmail,
-			Email: commitName,
+			Name:  defaultCommitEmail,
+			Email: defaultCommitName,
 			When:  time.Now(),
 		},
 	})
