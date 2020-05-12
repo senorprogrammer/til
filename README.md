@@ -45,6 +45,8 @@ Open `~/.config/til/config.yml`, change the following, and save:
 
 ## Usage
 
+`til` only has three commands: empty, -build, and -save.
+
 ### Creating a new page
 
 ```bash
