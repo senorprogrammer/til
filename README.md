@@ -67,9 +67,11 @@ Builds the index and tag pages, and leaves them uncommitted.
 ### Building, saving, committing, and pushing
 
 ```bash
-❯ til -save
+❯ til -save [optional commit message]
 ```
 
 Builds the index and tag pages, commits everything to the git repo with the commit message you've defined in your config, and pushes it all up to the remote repo.
+
+`-save` takes an optional commit message. If that message is supplied, it will be used as the commit message. If that message is not supplied, the `commitMessage` value in the config file will be used. If that value is not supplied, an error will be raised.
 
 As an example: [https://senorprogrammer.github.io/til/](https://senorprogrammer.github.io/til/).
