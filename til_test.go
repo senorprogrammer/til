@@ -6,6 +6,55 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+/* -------------------- Tag -------------------- */
+
+func Test_Tag_NewTag(t *testing.T) {
+	actual := NewTag("ada", &Page{Title: "test"})
+
+	assert.IsType(t, &Tag{}, actual)
+	assert.Equal(t, "ada", actual.Name)
+	assert.Equal(t, "test", actual.Pages[0].Title)
+}
+
+func Test_Tag_AddPage(t *testing.T) {
+	tag := NewTag("ada", &Page{Title: "test"})
+	tag.AddPage(&Page{Title: "zombies"})
+
+	assert.Equal(t, 2, len(tag.Pages))
+	assert.Equal(t, "zombies", tag.Pages[1].Title)
+}
+
+func Test_Tag_IsValid(t *testing.T) {
+	tests := []struct {
+		name     string
+		title    string
+		expected bool
+	}{
+		{
+			name:     "when invalid",
+			title:    "",
+			expected: false,
+		},
+		{
+			name:     "when valid",
+			title:    "test",
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tag := NewTag(tt.title, &Page{})
+
+			actual := tag.IsValid()
+
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
+/* -------------------- TagMap -------------------- */
+
 func Test_NewTagMap(t *testing.T) {
 	tests := []struct {
 		name        string
