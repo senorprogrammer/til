@@ -27,7 +27,7 @@ const (
 	defaultConfig = `--- 
 commitMessage: "build, save, push"
 committerEmail: test@example.com
-committerName: "Change Me"
+committerName: "TIL Autobot"
 editor: "mvim"
 `
 
