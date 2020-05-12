@@ -16,15 +16,22 @@ import (
 	"github.com/ericaro/frontmatter"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/olebedev/config"
 )
 
 const (
-	// Used in the auto-generated commit message when -save is used
-	commitMsg     = "build, save, push"
-	commiterName  = "Chris Cummer"
-	commiterEmail = "chriscummer@me.com"
+	// Configuration
+	tilConfigDir  = "~/.config/til/"
+	tilConfigFile = "config.yml"
 
-	editor        = "mvim"
+	defaultConfig = `
+--- 
+commitMessage: "build, save, push"
+commiterEmail: test@example.com
+commiterName: "Change Me"
+editor: "mvim"
+`
+
 	fileExtension = "md"
 
 	// A custom datetime format that plays nicely with GitHub Pages filename restrictions
@@ -32,7 +39,13 @@ const (
 
 	/* -------------------- Messages -------------------- */
 
-	errNoTitle = "title must not be blank"
+	errConfigDirCreate  = "could not create the configuration directory"
+	errConfigExpandPath = "could not expand the config directory"
+	errConfigFileAssert = "could not assert the configuration file exists"
+	errConfigFileCreate = "could not create the configuration file"
+	errConfigFileWrite  = "could not write the configuration file"
+	errConfigValueRead  = "could not read a required configuration value"
+	errNoTitle          = "title must not be blank"
 
 	statusDone     = "done"
 	statusIdxBuild = "building index page"
@@ -55,6 +68,12 @@ var (
 	Yellow = Colour("\033[1;33m%s\033[0m")
 )
 
+// globalConfig holds and makes available all the user-configurable
+// settings that are stored in the config file
+// (I know! Friends don't let friends use globals, but as I have
+// no friends working on this, there's no one around to stop me)
+var globalConfig *config.Config
+
 func init() {
 	log.SetOutput(os.Stderr)
 	log.SetOutput(os.Stdout)
@@ -62,6 +81,8 @@ func init() {
 }
 
 func main() {
+	loadConfig()
+
 	// If the -build flag is set, we're not creating a new page, we're rebuilding the index and tag pages
 	buildPtr := flag.Bool("build", false, "builds the index and tag pages")
 
@@ -107,6 +128,109 @@ func main() {
 
 	log.Print(statusDone)
 	os.Exit(0)
+}
+
+/* -------------------- Configuration -------------------- */
+
+// getConfigDir returns the string path to the directory that should
+// contain the configuration file
+func getConfigDir() string {
+	cDir := os.Getenv("XDG_CONFIG_HOME")
+	if cDir == "" {
+		cDir = tilConfigDir
+	}
+
+	// If the user hasn't changed the default path then we expect it to start
+	// with a tilde (the user's home), and we need to turn that into an
+	// absolute path. If it does not start with a '~' then we assume the
+	// user has set their $XDG_CONFIG_HOME to something specific, and we
+	// do not mess with it (because doing so makes the archlinux people
+	// very cranky)
+	if cDir[0] != '~' {
+		return cDir
+	}
+
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		Fail(errors.New(errConfigExpandPath))
+	}
+
+	return filepath.Join(dir, cDir[1:])
+}
+
+// getConfigPath returns the string path to the configuration file
+func getConfigPath() string {
+	cDir := getConfigDir()
+	cPath := fmt.Sprintf("%s/%s", cDir, tilConfigFile)
+
+	return cPath
+}
+
+func loadConfig() {
+	makeConfigDir()
+	makeConfigFile()
+	readConfigFile()
+}
+
+// Be XDG-compatible yo
+// https://wiki.archlinux.org/index.php/XDG_Base_Directory
+func makeConfigDir() {
+	cDir := getConfigDir()
+
+	if _, err := os.Stat(cDir); os.IsNotExist(err) {
+		err := os.MkdirAll(cDir, os.ModePerm)
+		if err != nil {
+			Fail(errors.New(errConfigDirCreate))
+		}
+	}
+}
+
+func makeConfigFile() {
+	cPath := getConfigPath()
+
+	fileInfo, err := os.Stat(cPath)
+
+	if err != nil {
+		// Uh oh, something went wrong trying to find the config file.
+		// Let's see if we can figure out what happened
+		if os.IsNotExist(err) {
+			// Ah, the config file does not exist, which is probably fine
+			_, err = os.Create(cPath)
+			if err != nil {
+				Fail(errors.New(errConfigFileCreate))
+			}
+		} else {
+			// But wait, it's some kind of other error. What kind?
+			// I dunno, but it probably means we shouldn't continue, so...
+			Fail(err)
+		}
+	}
+
+	// Let's double-check that the file's there now (and because there's
+	// a pretty good chance the earlier fileInfo doesn't exist)
+	fileInfo, err = os.Stat(cPath)
+	if err != nil {
+		Fail(errors.New(errConfigFileAssert))
+	}
+
+	// Anyhow, we made it this far so now we should write the default config
+	// but only if the file is empty
+	if fileInfo.Size() == 0 {
+		if ioutil.WriteFile(cPath, []byte(defaultConfig), 0600) != nil {
+			Fail(errors.New(errConfigFileWrite))
+		}
+	}
+}
+
+func readConfigFile() {
+	cPath := getConfigPath()
+
+	cfg, err := config.ParseYamlFile(cPath)
+	if err != nil {
+		Fail(err)
+	}
+
+	globalConfig = cfg
 }
 
 /* -------------------- Helper functions -------------------- */
@@ -221,6 +345,11 @@ func createNewPage(title string) string {
 		Fail(err)
 	}
 
+	editor, err1 := globalConfig.String("editor")
+	if err1 != nil {
+		Fail(err1)
+	}
+
 	// And open the file for editing, exploding if we can't do that
 	cmd := exec.Command(editor, filePath)
 	err = cmd.Run()
@@ -283,9 +412,8 @@ func readPage(filePath string) *Page {
 	return page
 }
 
+// https://github.com/go-git/go-git/blob/master/_examples/commit/main.go
 func save() {
-	// https://github.com/go-git/go-git/blob/master/_examples/commit/main.go
-
 	Info(statusRepoSave)
 
 	r, err := git.PlainOpen(".")
@@ -303,10 +431,17 @@ func save() {
 		Fail(err)
 	}
 
+	commitMsg, err1 := globalConfig.String("commitMessage")
+	commitEmail, err2 := globalConfig.String("commitEmail")
+	commitName, err3 := globalConfig.String("commitName")
+	if err1 != nil || err2 != nil || err3 != nil {
+		Fail(errors.New(errConfigValueRead))
+	}
+
 	commit, err := w.Commit(commitMsg, &git.CommitOptions{
 		Author: &object.Signature{
-			Name:  commiterName,
-			Email: commiterEmail,
+			Name:  commitEmail,
+			Email: commitName,
 			When:  time.Now(),
 		},
 	})
@@ -322,7 +457,7 @@ func save() {
 	Info(obj.Message)
 }
 
-/* -------------------- Helper Functions -------------------- */
+/* -------------------- More Helper Functions -------------------- */
 
 // Colour returns a function that defines a printable colour string
 func Colour(colorString string) func(...interface{}) string {
