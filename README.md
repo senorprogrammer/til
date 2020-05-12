@@ -4,15 +4,7 @@
 
 # til
 
-A place to keep track of things I've learned that don't warrant a blog post.
-
-I use this `zsh` alias to execute it from whichever directory I'm in:
-
-```shell
-alias til='cd ~/Documents/til && go run ./til.go'
-```
-
-(Yep, I don't bother to compile/install it, it's fast enough as-is).
+`til` started out as a place to keep track of things I've learned that don't warrant a full blog post. Now it's a fast, simple, command line-driven, mini-static site generator.
 
 ## Installation
 
@@ -42,6 +34,16 @@ Open `~/.config/til/config.yml`, change the following, and save:
 `committerEmail` and `committerName` are the values it will use to commit with when running `til -build`. 
 
 `editor` is the text editor it will open for writing in when running `til [some title here]`.
+
+## Execution
+
+I use this `zsh` alias to execute it from whichever directory I'm in:
+
+```shell
+alias til='cd ~/Documents/til && go run ./til.go'
+```
+
+I don't bother to compile/install it, it's fast enough as-is. However, `go install` works just fine. 
 
 ## Usage
 
