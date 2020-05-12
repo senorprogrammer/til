@@ -16,7 +16,7 @@ alias til='cd ~/Documents/til && go run ./til.go'
 
 ## Installation
 
-To use this yourself, the simplest approach is probably to clone this repo yourself and just delete the content from the `/docs` directory.
+To use this yourself, the simplest approach is probably to fork this repo yourself and just delete the content from the `/docs` directory.
 
 You could also:
 
