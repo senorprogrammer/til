@@ -1,5 +1,6 @@
 [astronomy](./astronomy), [culture](./culture), [go](./go), [grep](./grep), [language](./language), [linux](./linux), [psychology](./psychology), [terminal](./terminal), 
 
+* <code>May 11, 2020</code> [iTerm2 Tab Stops Setting](2020-05-11T22-49-48-iterm2-tab-stops-setting.md)
 * <code>May 11, 2020</code> [PTAL](2020-05-11T15-04-57-ptal.md)
 * <code>May 11, 2020</code> [Go Table Test Structure](2020-05-11T10-42-26-go-table-test-structure.md)
 * <code>May 11, 2020</code> [Measuring Stars Above The Horizon](2020-05-11T00-17-00-measuring-stars-above-the-horizon.md)
@@ -22,4 +23,4 @@
 
 
 
-<sup><sub>generated 11 May 2020 22:45:34 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
+<sup><sub>generated 11 May 2020 22:51:14 by <a href='https://github.com/senorprogrammer/til'>til</a></sub></sup>
