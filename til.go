@@ -73,30 +73,39 @@ var (
 // no friends working on this, there's no one around to stop me)
 var globalConfig *config.Config
 
+var buildFlag bool
+var saveFlag bool
+
 func init() {
 	log.SetOutput(os.Stderr)
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	flag.BoolVar(&buildFlag, "b", false, "builds the index and tag pages (short-hand)")
+	flag.BoolVar(&buildFlag, "build", false, "builds the index and tag pages")
+
+	flag.BoolVar(&buildFlag, "s", false, "builds, saves, and pushes (short-hand)")
+	flag.BoolVar(&buildFlag, "save", false, "builds, saves, and pushes")
 }
 
 func main() {
 	loadConfig()
 
-	// If the -build flag is set, we're not creating a new page, we're rebuilding the index and tag pages
-	buildPtr := flag.Bool("build", false, "builds the index and tag pages")
+	// // If the -build flag is set, we're not creating a new page, we're rebuilding the index and tag pages
+	// buildPtr := flag.Bool("build", false, "builds the index and tag pages")
 
-	// If the -save flag is set, we're saving newly-created pages, rebuilding everything, and then pushing
-	// up to the remote repo
-	savePtr := flag.Bool("save", false, "saves, builds, and pushes")
+	// // If the -save flag is set, we're saving newly-created pages, rebuilding everything, and then pushing
+	// // up to the remote repo
+	// savePtr := flag.Bool("save", false, "saves, builds, and pushes")
 
 	flag.Parse()
 
-	if *buildPtr {
+	if buildFlag {
 		build()
 		Victory(statusDone)
 	}
 
-	if *savePtr {
+	if saveFlag {
 		build()
 		save()
 		push()
