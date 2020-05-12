@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ericaro/frontmatter"
@@ -294,8 +295,14 @@ func buildTagPages(pages []*Page) *TagMap {
 
 	tagMap := NewTagMap(pages)
 
+	var wGroup sync.WaitGroup
+
 	for _, tagName := range tagMap.SortedTagNames() {
+		wGroup.Add(1)
+
 		go func(tagName string) {
+			defer wGroup.Done()
+
 			content := fmt.Sprintf("## %s\n\n", tagName)
 
 			for _, tag := range tagMap.Get(tagName) {
@@ -321,6 +328,8 @@ func buildTagPages(pages []*Page) *TagMap {
 			log.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
 		}(tagName)
 	}
+
+	wGroup.Wait()
 
 	return tagMap
 }
