@@ -8,6 +8,7 @@
 
 * [Installation](#installation)
 * [Configuration](#configuration)
+    * [Example](#example)
 * [Execution](#execution)
 * [Usage](#usage)
     * [Creating a new page](#creating-a-new-page)
