@@ -29,9 +29,9 @@ Now run `til --help` to initialize everything and make sure it's working.
 
 ## Configuration
 
-When you first ran `til --help` it will have either exploded with an error message (open an issue here with the message, if you like), or it will have displayed the help info. If you saw help info, it also will have created a configuration file that you'll need to edit.
+When you first ran `til --help` it either exploded with an error message (open an issue here with the message), or it displayed the help info. If you saw help info, it also will have created a configuration file that you'll need to edit.
 
-That file is probably in `~/.config/til/config.yml`. If you're an XDG base directory kind of person, it will be wherever that is.
+The config file is in `~/.config/til/config.yml` (if you're an XDG kind of person, it will be wherever you've set that to).
 
 Open `~/.config/til/config.yml`, change the following, and save:
 
@@ -52,7 +52,7 @@ Open `~/.config/til/config.yml`, change the following, and save:
 2020-04-20T14-52-57-testing-title.md
 ```
 
-And then that page will open in [MacVim](https://macvim-dev.github.io/macvim/).
+And then that page will open in [MacVim](https://macvim-dev.github.io/macvim/) or whichever editor you've defined in your config.
 
 ### Building static pages
 
@@ -60,14 +60,14 @@ And then that page will open in [MacVim](https://macvim-dev.github.io/macvim/).
 ❯ til -build
 ```
 
-Builds the index and tag pages.
+Builds the index and tag pages, and leaves them uncommitted.
 
-### Saving all
+### Building, saving, committing, and pushing
 
 ```bash
 ❯ til -save
 ```
 
-Builds the index and tag pages, commits everything to the git repo with a generic commit message, and pushes it all up to the remote repo.
+Builds the index and tag pages, commits everything to the git repo with the commit message you've defined in your config, and pushes it all up to the remote repo.
 
-For example: [https://senorprogrammer.github.io/til/](https://senorprogrammer.github.io/til/).
+As an example: [https://senorprogrammer.github.io/til/](https://senorprogrammer.github.io/til/).
