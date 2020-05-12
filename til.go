@@ -29,6 +29,7 @@ commitMessage: "build, save, push"
 committerEmail: test@example.com
 committerName: "Change Me"
 editor: "mvim"
+targetDirectory: "."
 `
 
 	fileExtension = "md"
