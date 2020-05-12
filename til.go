@@ -295,29 +295,31 @@ func buildTagPages(pages []*Page) *TagMap {
 	tagMap := NewTagMap(pages)
 
 	for _, tagName := range tagMap.SortedTagNames() {
-		content := fmt.Sprintf("## %s\n\n", tagName)
+		go func(tagName string) {
+			content := fmt.Sprintf("## %s\n\n", tagName)
 
-		for _, tag := range tagMap.Get(tagName) {
-			for _, page := range tag.Pages {
-				if page.IsContentPage() {
-					content += fmt.Sprintf("* %s\n", page.Link())
+			for _, tag := range tagMap.Get(tagName) {
+				for _, page := range tag.Pages {
+					if page.IsContentPage() {
+						content += fmt.Sprintf("* %s\n", page.Link())
+					}
 				}
 			}
-		}
 
-		// Write the footer content into the bottom of the page
-		content += fmt.Sprintf("\n")
-		content += footer()
+			// Write the footer content into the bottom of the page
+			content += fmt.Sprintf("\n")
+			content += footer()
 
-		// And write the file to disk
-		fileName := fmt.Sprintf("./docs/%s.%s", tagName, fileExtension)
+			// And write the file to disk
+			fileName := fmt.Sprintf("./docs/%s.%s", tagName, fileExtension)
 
-		err := ioutil.WriteFile(fileName, []byte(content), 0644)
-		if err != nil {
-			Fail(err)
-		}
+			err := ioutil.WriteFile(fileName, []byte(content), 0644)
+			if err != nil {
+				Fail(err)
+			}
 
-		log.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
+			log.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
+		}(tagName)
 	}
 
 	return tagMap
