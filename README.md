@@ -6,6 +6,14 @@
 
 `til` started out as a place to keep track of things I've learned that don't warrant a full blog post. Now it's a fast, simple, command line-driven, mini-static site generator.
 
+* [Installation](#installation)
+* [Configuration](#configuration)
+* [Execution](#execution)
+* [Usage](#usage)
+    * [Creating a new page](#creating-a-new-page)
+    * [Building static pages](#building-static-pages)
+    * [Building, saving, committing, and pushing](#building-saving-committing-and-pushing)
+
 ## Installation
 
 To use this yourself, the simplest approach is probably to fork this repo and delete the contents of the `/docs` directory.
