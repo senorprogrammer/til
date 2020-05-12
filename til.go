@@ -92,7 +92,6 @@ func init() {
 }
 
 func main() {
-
 	loadConfig()
 
 	/* Flags */

@@ -6,6 +6,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+/* -------------------- More Helper Functions -------------------- */
+
+func Test_Colour(t *testing.T) {
+	x := Colour("yo%soy")
+	actual := x("cat")
+
+	assert.Equal(t, "yocatoy", actual)
+}
+
 /* -------------------- Page -------------------- */
 
 func Test_Page_CreatedAt(t *testing.T) {
