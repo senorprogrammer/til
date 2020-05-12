@@ -91,12 +91,7 @@ func init() {
 func main() {
 	loadConfig()
 
-	// // If the -build flag is set, we're not creating a new page, we're rebuilding the index and tag pages
-	// buildPtr := flag.Bool("build", false, "builds the index and tag pages")
-
-	// // If the -save flag is set, we're saving newly-created pages, rebuilding everything, and then pushing
-	// // up to the remote repo
-	// savePtr := flag.Bool("save", false, "saves, builds, and pushes")
+	/* Flags */
 
 	flag.Parse()
 
@@ -110,9 +105,11 @@ func main() {
 
 		build()
 		save(commitMsg)
-		// push()
+		push()
 		Victory(statusDone)
 	}
+
+	/* Page creation */
 
 	// Every non-dash argument is considered a part of the title. If there are no arguments, we have no title
 	// Can't have a page without a title
@@ -122,15 +119,13 @@ func main() {
 
 	title := strings.Title(strings.Join(os.Args[1:], " "))
 
-	filePath := createNewPage(title)
+	pagePath := createNewPage(title)
 
-	// Write the filepath to the console. This makes it easy to know which file we just created
-	log.Print(fmt.Sprintf("%s %s", Green("->"), filePath))
+	// Write the pagePath to the console. This makes it easy to know which file we just created
+	log.Print(fmt.Sprintf("%s %s", Green("->"), pagePath))
 
 	// And rebuild the index and tag pages
-	pages := loadPages()
-	tagMap := buildTagPages(pages)
-	buildIndexPage(pages, tagMap)
+	build()
 
 	Victory(statusDone)
 }
@@ -178,8 +173,6 @@ func getConfigPath() string {
 	return cPath
 }
 
-// Be XDG-compatible yo
-// https://wiki.archlinux.org/index.php/XDG_Base_Directory
 func makeConfigDir() {
 	cDir := getConfigDir()
 
@@ -213,17 +206,14 @@ func makeConfigFile() {
 		}
 	}
 
-	// Let's double-check that the file's there now (and because there's
-	// a pretty good chance the earlier fileInfo is nil, even though the
-	// file should now exist)
+	// Let's double-check that the file's there now
 	fileInfo, err = os.Stat(cPath)
 	if err != nil {
 		Fail(errors.New(errConfigFileAssert))
 	}
 
-	// We made it this far so now we should write the default config
-	// but only if the file is empty. Don't want to stop on any non-default
-	// values the user has written in there
+	// Write the default config, but only if the file is empty.
+	// Don't want to stop on any non-default values the user has written in there
 	if fileInfo.Size() == 0 {
 		if ioutil.WriteFile(cPath, []byte(defaultConfig), 0600) != nil {
 			Fail(errors.New(errConfigFileWrite))
@@ -258,7 +248,7 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	content := ""
 	prevPage := &Page{}
 
-	// Write the tag list
+	// Write the tag list into the top of the index
 	for _, tag := range tagMap.SortedTagNames() {
 		content += fmt.Sprintf(
 			"[%s](%s), ",
@@ -267,8 +257,8 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 		)
 	}
 
-	// Write the page list
-	// This is a set of pages listed by month
+	// Write the page list into the middle of the index
+	// This is sorted by month, in reverse-chronological order
 	for _, page := range pages {
 		if !page.IsContentPage() {
 			continue
@@ -286,7 +276,7 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 
 	content += fmt.Sprintf("\n")
 
-	// Write the footer content
+	// Write the footer content into the bottom of the index
 	content += fmt.Sprintf("\n")
 	content += fmt.Sprintf("\n")
 	content += footer()
@@ -315,19 +305,19 @@ func buildTagPages(pages []*Page) *TagMap {
 			}
 		}
 
-		// Write the footer content
+		// Write the footer content into the bottom of the page
 		content += fmt.Sprintf("\n")
 		content += footer()
 
 		// And write the file to disk
 		fileName := fmt.Sprintf("./docs/%s.%s", tagName, fileExtension)
 
-		log.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
-
 		err := ioutil.WriteFile(fileName, []byte(content), 0644)
 		if err != nil {
 			Fail(err)
 		}
+
+		log.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
 	}
 
 	return tagMap
@@ -337,7 +327,7 @@ func createNewPage(title string) string {
 	date := time.Now()
 	pathDate := date.Format(ghFriendlyDateFormat)
 
-	// Front matter lives at the top of the generated file and contains bits of info about the file
+	// Front matter lives at the top of the generated file and contains bits of info about the page
 	// This is loosely based on the format Hugo uses
 	frontMatter := fmt.Sprintf(
 		"---\ndate: %s\ntitle: %s\ntags: %s\n---\n\n",
@@ -356,12 +346,12 @@ func createNewPage(title string) string {
 		Fail(err)
 	}
 
+	// Tell the OS to open the newly-created page in the editor (as specified in the config)
 	editor, err1 := globalConfig.String("editor")
 	if err1 != nil {
 		Fail(err1)
 	}
 
-	// And open the file for editing, exploding if we can't do that
 	cmd := exec.Command(editor, filePath)
 	err = cmd.Run()
 	if err != nil {
@@ -379,9 +369,7 @@ func loadPages() []*Page {
 	filePaths, _ := filepath.Glob(fmt.Sprintf("./docs/*.%s", fileExtension))
 
 	for i := len(filePaths) - 1; i >= 0; i-- {
-		file := filePaths[i]
-		page := readPage(file)
-
+		page := readPage(filePaths[i])
 		pages = append(pages, page)
 	}
 
