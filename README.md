@@ -26,11 +26,11 @@ You can also:
 * create the `docs` directory: `mkdir docs`
 * push that up to GitHub
 
-Now run `til --help` to initialize everything and make sure it's working.
+Now run `go run til.go --help` to initialize everything and make sure it's working.
 
 ## Configuration
 
-When you first ran `til --help` it either exploded with an error message (open an issue here with the message), or it displayed the help info. If you saw help info, it also will have created a configuration file that you'll need to edit.
+When you first ran `go run til.go --help` it either exploded with an error message (open an issue here with the message), or it displayed the help info. If you saw help info, it also will have created a configuration file that you'll need to edit.
 
 The config file is in `~/.config/til/config.yml` (if you're an XDG kind of person, it will be wherever you've set that to).
 
