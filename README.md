@@ -25,7 +25,21 @@ You could also:
 * create the `docs` directory: `mkdir docs`
 * push that up to GitHub
 
-**Note:** Don't forget to change the `commiterName` and `commiterEmail` constants in `til.go` to your own values. And if you don't use MacVim, change `editor` as well.
+Now run `til --help` to initialize everything and make sure it's working.
+
+## Configuration
+
+When you first ran `til --help` it will have either exploded with an error message (open an issue here with the message, if you like), or it will have displayed the help info. If you saw help info, it also will have created a configuration file that you'll need to edit.
+
+That file is probably in `~/.config/til/config.yml`. If you're an XDG base directory kind of person, it will be wherever that is.
+
+Open `~/.config/til/config.yml`, change the following, and save:
+
+    * committerEmail
+    * committerName
+    * editor
+    
+`committerEmail` and `committerName` are the values it will use when committing against the repo when running `til -build`. `editor` is the text editor it will open for writing in when running `til [some title here]`.
 
 ## Usage
 
