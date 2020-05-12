@@ -4,7 +4,7 @@
 
 # til
 
-`til` started out as a place to keep track of things I've learned that don't warrant a full blog post. Now it's a fast, simple, command line-driven, mini-static site generator.
+`til` started out as a place to keep track of things I've learned that don't warrant a full blog post. Now it's a fast, simple, command line-driven, mini-static site builder atop GitHub Pages.
 
 * [Installation](#installation)
 * [Configuration](#configuration)
