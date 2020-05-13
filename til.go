@@ -248,8 +248,6 @@ func readConfigFile() {
 func buildTargetDirectory() {
 	tDir := getTargetDir()
 
-	tDir += "/docs"
-
 	if _, err := os.Stat(tDir); os.IsNotExist(err) {
 		err := os.MkdirAll(tDir, os.ModePerm)
 		if err != nil {
@@ -275,7 +273,7 @@ func getTargetDir() string {
 		Fail(errors.New(errConfigExpandPath))
 	}
 
-	return filepath.Join(dir, tDir[1:])
+	return filepath.Join(dir, tDir[1:], "/docs")
 }
 
 /* -------------------- Helper functions -------------------- */
@@ -326,7 +324,13 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	content += footer()
 
 	// And write the file to disk
-	err := ioutil.WriteFile(fmt.Sprintf("./docs/index.%s", fileExtension), []byte(content), 0644)
+	filePath := fmt.Sprintf(
+		"%s/index.%s",
+		getTargetDir(),
+		fileExtension,
+	)
+
+	err := ioutil.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
 		Fail(err)
 	}
@@ -361,14 +365,19 @@ func buildTagPages(pages []*Page) *TagMap {
 			content += footer()
 
 			// And write the file to disk
-			fileName := fmt.Sprintf("./docs/%s.%s", tagName, fileExtension)
+			filePath := fmt.Sprintf(
+				"%s/%s.%s",
+				getTargetDir(),
+				tagName,
+				fileExtension,
+			)
 
-			err := ioutil.WriteFile(fileName, []byte(content), 0644)
+			err := ioutil.WriteFile(filePath, []byte(content), 0644)
 			if err != nil {
 				Fail(err)
 			}
 
-			ll.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
+			ll.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), filePath))
 		}(tagName, ll)
 	}
 
@@ -393,9 +402,15 @@ func createNewPage(title string) string {
 	content := frontMatter + fmt.Sprintf("# %s\n\n\n", title)
 
 	// Write out the stub file, explode if we can't do that
-	filePath := fmt.Sprintf("./docs/%s-%s.%s", pathDate, strings.ReplaceAll(strings.ToLower(title), " ", "-"), fileExtension)
+	filePath := fmt.Sprintf(
+		"%s/%s-%s.%s",
+		getTargetDir(),
+		pathDate,
+		strings.ReplaceAll(strings.ToLower(title), " ", "-"),
+		fileExtension,
+	)
 
-	err := ioutil.WriteFile(fmt.Sprintf("%s", filePath), []byte(content), 0644)
+	err := ioutil.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
 		Fail(err)
 	}
@@ -420,7 +435,13 @@ func createNewPage(title string) string {
 func loadPages() []*Page {
 	pages := []*Page{}
 
-	filePaths, _ := filepath.Glob(fmt.Sprintf("./docs/*.%s", fileExtension))
+	filePaths, _ := filepath.Glob(
+		fmt.Sprintf(
+			"%s/*.%s",
+			getTargetDir(),
+			fileExtension,
+		),
+	)
 
 	for i := len(filePaths) - 1; i >= 0; i-- {
 		page := readPage(filePaths[i])
