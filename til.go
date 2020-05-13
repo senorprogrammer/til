@@ -258,18 +258,19 @@ func buildTargetDirectory() {
 
 // getTargetDir returns the absolute string path to the directory that the
 // content will be written to
-func getTargetDir(withDocs bool) string {
+func getTargetDir(withDocsDir bool) string {
+	docsBit := ""
+	if withDocsDir {
+		docsBit = "/docs"
+	}
+
 	tDir, err := globalConfig.String("targetDirectory")
 	if err != nil {
 		Fail(err)
 	}
 
 	if tDir[0] != '~' {
-		if withDocs {
-			return tDir + "/docs"
-		}
-
-		return tDir
+		return tDir + docsBit
 	}
 
 	dir, err := os.UserHomeDir()
@@ -277,11 +278,7 @@ func getTargetDir(withDocs bool) string {
 		Fail(errors.New(errConfigExpandPath))
 	}
 
-	if withDocs {
-		return filepath.Join(dir, tDir[1:], "/docs")
-	}
-
-	return filepath.Join(dir, tDir[1:])
+	return filepath.Join(dir, tDir[1:], docsBit)
 }
 
 /* -------------------- Helper functions -------------------- */
