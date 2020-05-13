@@ -9,7 +9,9 @@
 ❯ til -save
 ```
 
-You're done.
+And you're done.
+
+# Contents
 
 * [Installation](#installation)
 * [Configuration](#configuration)
