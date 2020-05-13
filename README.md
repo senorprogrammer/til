@@ -1,4 +1,4 @@
-<p align="center"><img src="till_header.png" width="980" height="327" alt="til" title="til: jot it down" /></p>
+<p align="center"><img src="till_header.png" width="916" height="306" alt="til" title="til: jot it down" /></p>
 
 # til
 
