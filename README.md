@@ -107,4 +107,4 @@ Builds the index and tag pages, commits everything to the git repo with the comm
 
 ## Live Example
 
-An example site: [https://senorprogrammer.github.io/til/](https://senorprogrammer.github.io/til/).
+An example site: [https://senorprogrammer.github.io/tilde/](https://senorprogrammer.github.io/tilde/).
