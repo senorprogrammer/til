@@ -33,6 +33,7 @@ You can also:
 * copy `til.go` into it
 * create the `docs` directory: `mkdir docs`
 * push that up to GitHub
+* `go install til.go`
 
 Now run `til --help` to initialize everything and make sure it's working.
 
