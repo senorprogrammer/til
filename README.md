@@ -2,7 +2,7 @@
 
 `til` is a fast, simple, command line-driven, mini-static site builder. Three commands, that's it (two if you're not too picky about your commit messages).
 
-# tl;rd
+# tl;dr
 
 ```bash
 ❯ til New title here
