@@ -2,15 +2,6 @@
 
 `til` is a fast, simple, command line-driven, mini-static site builder. Three commands, that's it (two if you're not too picky about your commit messages).
 
-* [Installation](#installation)
-* [Configuration](#configuration)
-    * [Example](#config-example)
-* [Execution](#execution)
-* [Usage](#usage)
-    * [Creating a new page](#creating-a-new-page)
-    * [Building static pages](#building-static-pages)
-    * [Building, saving, committing, and pushing](#building-saving-committing-and-pushing)
-
 # tl;rd
 
 ```bash
@@ -19,6 +10,15 @@
 ```
 
 You're done.
+
+* [Installation](#installation)
+* [Configuration](#configuration)
+    * [Example](#config-example)
+* [Execution](#execution)
+* [Usage](#usage)
+    * [Creating a new page](#creating-a-new-page)
+    * [Building static pages](#building-static-pages)
+    * [Building, saving, committing, and pushing](#building-saving-committing-and-pushing)
 
 ## Installation
 
