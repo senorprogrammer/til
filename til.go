@@ -246,7 +246,7 @@ func readConfigFile() {
 // the config file, exists and contains a /docs folder for writing pages to.
 // If these directories don't exist, it tries to create them
 func buildTargetDirectory() {
-	tDir := getTargetDir()
+	tDir := getTargetDir(true)
 
 	if _, err := os.Stat(tDir); os.IsNotExist(err) {
 		err := os.MkdirAll(tDir, os.ModePerm)
@@ -258,13 +258,17 @@ func buildTargetDirectory() {
 
 // getTargetDir returns the absolute string path to the directory that the
 // content will be written to
-func getTargetDir() string {
+func getTargetDir(withDocs bool) string {
 	tDir, err := globalConfig.String("targetDirectory")
 	if err != nil {
 		Fail(err)
 	}
 
 	if tDir[0] != '~' {
+		if withDocs {
+			return tDir + "/docs"
+		}
+
 		return tDir
 	}
 
@@ -273,7 +277,11 @@ func getTargetDir() string {
 		Fail(errors.New(errConfigExpandPath))
 	}
 
-	return filepath.Join(dir, tDir[1:], "/docs")
+	if withDocs {
+		return filepath.Join(dir, tDir[1:], "/docs")
+	}
+
+	return filepath.Join(dir, tDir[1:])
 }
 
 /* -------------------- Helper functions -------------------- */
@@ -326,7 +334,7 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	// And write the file to disk
 	filePath := fmt.Sprintf(
 		"%s/index.%s",
-		getTargetDir(),
+		getTargetDir(true),
 		fileExtension,
 	)
 
@@ -367,7 +375,7 @@ func buildTagPages(pages []*Page) *TagMap {
 			// And write the file to disk
 			filePath := fmt.Sprintf(
 				"%s/%s.%s",
-				getTargetDir(),
+				getTargetDir(true),
 				tagName,
 				fileExtension,
 			)
@@ -404,7 +412,7 @@ func createNewPage(title string) string {
 	// Write out the stub file, explode if we can't do that
 	filePath := fmt.Sprintf(
 		"%s/%s-%s.%s",
-		getTargetDir(),
+		getTargetDir(true),
 		pathDate,
 		strings.ReplaceAll(strings.ToLower(title), " ", "-"),
 		fileExtension,
@@ -438,7 +446,7 @@ func loadPages() []*Page {
 	filePaths, _ := filepath.Glob(
 		fmt.Sprintf(
 			"%s/*.%s",
-			getTargetDir(),
+			getTargetDir(true),
 			fileExtension,
 		),
 	)
@@ -455,7 +463,9 @@ func loadPages() []*Page {
 func push() {
 	Info(statusRepoPush)
 
-	r, err := git.PlainOpen(".")
+	tDir := getTargetDir(false)
+
+	r, err := git.PlainOpen(tDir)
 	if err != nil {
 		Fail(err)
 	}
@@ -490,7 +500,9 @@ func readPage(filePath string) *Page {
 func save(commitMsg string) {
 	Info(statusRepoSave)
 
-	r, err := git.PlainOpen(".")
+	tDir := getTargetDir(false)
+
+	r, err := git.PlainOpen(tDir)
 	if err != nil {
 		Fail(err)
 	}
@@ -613,7 +625,9 @@ func (page *Page) Link() string {
 		"<code>%s</code> [%s](%s)",
 		page.PrettyDate(),
 		page.Title,
-		strings.Replace(page.FilePath, "docs/", "", -1))
+		// strings.Replace(page.FilePath, "docs/", "", -1))
+		filepath.Base(page.FilePath),
+	)
 }
 
 // PrettyDate returns a human-friendly representation of the CreatedAt date
