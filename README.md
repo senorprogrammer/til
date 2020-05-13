@@ -1,15 +1,24 @@
 <p align="center"><img src="till_header.png" width="916" height="306" alt="til" title="til: jot it down" /></p>
 
-`til` is a fast, simple, command line-driven, mini-static site builder. Three commands, that's it.
+`til` is a fast, simple, command line-driven, mini-static site builder. Three commands, that's it (two if you're not too picky about your commit messages).
 
 * [Installation](#installation)
 * [Configuration](#configuration)
-    * [Example](#example)
+    * [Example](#config-example)
 * [Execution](#execution)
 * [Usage](#usage)
     * [Creating a new page](#creating-a-new-page)
     * [Building static pages](#building-static-pages)
     * [Building, saving, committing, and pushing](#building-saving-committing-and-pushing)
+
+# tl;rd
+
+```bash
+❯ til New title here
+❯ til -save
+```
+
+You're done.
 
 ## Installation
 
@@ -40,7 +49,7 @@ Open `~/.config/til/config.yml`, change the following, and save:
 
 `editor` is the text editor it will open for writing in when running `til [some title here]`.
 
-### Example
+### Config Example
 
 ```
 ---
