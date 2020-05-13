@@ -622,7 +622,6 @@ func (page *Page) Link() string {
 		"<code>%s</code> [%s](%s)",
 		page.PrettyDate(),
 		page.Title,
-		// strings.Replace(page.FilePath, "docs/", "", -1))
 		filepath.Base(page.FilePath),
 	)
 }
