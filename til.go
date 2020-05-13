@@ -30,6 +30,7 @@ commitMessage: "build, save, push"
 committerEmail: test@example.com
 committerName: "TIL Autobot"
 editor: "mvim"
+targetDirectory: "~/Documents/til"
 `
 
 	fileExtension = "md"
@@ -46,6 +47,7 @@ editor: "mvim"
 	errConfigFileWrite  = "could not write the configuration file"
 	errConfigValueRead  = "could not read a required configuration value"
 	errNoTitle          = "title must not be blank"
+	errTargetDirCreate  = "could not create the target directories"
 
 	statusDone     = "done"
 	statusIdxBuild = "building index page"
@@ -93,20 +95,21 @@ func init() {
 
 func main() {
 	loadConfig()
+	buildTargetDirectory()
 
 	/* Flags */
 
 	flag.Parse()
 
 	if buildFlag {
-		build()
+		buildContent()
 		Victory(statusDone)
 	}
 
 	if saveFlag {
 		commitMsg := strings.Join(os.Args[2:], " ")
 
-		build()
+		buildContent()
 		save(commitMsg)
 		push()
 		Victory(statusDone)
@@ -128,7 +131,7 @@ func main() {
 	Info(pagePath)
 
 	// And rebuild the index and tag pages
-	build()
+	buildContent()
 
 	Victory(statusDone)
 }
@@ -237,9 +240,50 @@ func readConfigFile() {
 	globalConfig = cfg
 }
 
+/* -------------------- Target Directory -------------------- */
+
+// buildTargetDirectory verifies that the target directory, as specified in
+// the config file, exists and contains a /docs folder for writing pages to.
+// If these directories don't exist, it tries to create them
+func buildTargetDirectory() {
+	tDir := getTargetDir(true)
+
+	if _, err := os.Stat(tDir); os.IsNotExist(err) {
+		err := os.MkdirAll(tDir, os.ModePerm)
+		if err != nil {
+			Fail(errors.New(errTargetDirCreate))
+		}
+	}
+}
+
+// getTargetDir returns the absolute string path to the directory that the
+// content will be written to
+func getTargetDir(withDocsDir bool) string {
+	docsBit := ""
+	if withDocsDir {
+		docsBit = "/docs"
+	}
+
+	tDir, err := globalConfig.String("targetDirectory")
+	if err != nil {
+		Fail(err)
+	}
+
+	if tDir[0] != '~' {
+		return tDir + docsBit
+	}
+
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		Fail(errors.New(errConfigExpandPath))
+	}
+
+	return filepath.Join(dir, tDir[1:], docsBit)
+}
+
 /* -------------------- Helper functions -------------------- */
 
-func build() {
+func buildContent() {
 	pages := loadPages()
 	tagMap := buildTagPages(pages)
 	buildIndexPage(pages, tagMap)
@@ -285,7 +329,13 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	content += footer()
 
 	// And write the file to disk
-	err := ioutil.WriteFile(fmt.Sprintf("./docs/index.%s", fileExtension), []byte(content), 0644)
+	filePath := fmt.Sprintf(
+		"%s/index.%s",
+		getTargetDir(true),
+		fileExtension,
+	)
+
+	err := ioutil.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
 		Fail(err)
 	}
@@ -320,14 +370,19 @@ func buildTagPages(pages []*Page) *TagMap {
 			content += footer()
 
 			// And write the file to disk
-			fileName := fmt.Sprintf("./docs/%s.%s", tagName, fileExtension)
+			filePath := fmt.Sprintf(
+				"%s/%s.%s",
+				getTargetDir(true),
+				tagName,
+				fileExtension,
+			)
 
-			err := ioutil.WriteFile(fileName, []byte(content), 0644)
+			err := ioutil.WriteFile(filePath, []byte(content), 0644)
 			if err != nil {
 				Fail(err)
 			}
 
-			ll.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), fileName))
+			ll.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), filePath))
 		}(tagName, ll)
 	}
 
@@ -352,9 +407,15 @@ func createNewPage(title string) string {
 	content := frontMatter + fmt.Sprintf("# %s\n\n\n", title)
 
 	// Write out the stub file, explode if we can't do that
-	filePath := fmt.Sprintf("./docs/%s-%s.%s", pathDate, strings.ReplaceAll(strings.ToLower(title), " ", "-"), fileExtension)
+	filePath := fmt.Sprintf(
+		"%s/%s-%s.%s",
+		getTargetDir(true),
+		pathDate,
+		strings.ReplaceAll(strings.ToLower(title), " ", "-"),
+		fileExtension,
+	)
 
-	err := ioutil.WriteFile(fmt.Sprintf("%s", filePath), []byte(content), 0644)
+	err := ioutil.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
 		Fail(err)
 	}
@@ -379,7 +440,13 @@ func createNewPage(title string) string {
 func loadPages() []*Page {
 	pages := []*Page{}
 
-	filePaths, _ := filepath.Glob(fmt.Sprintf("./docs/*.%s", fileExtension))
+	filePaths, _ := filepath.Glob(
+		fmt.Sprintf(
+			"%s/*.%s",
+			getTargetDir(true),
+			fileExtension,
+		),
+	)
 
 	for i := len(filePaths) - 1; i >= 0; i-- {
 		page := readPage(filePaths[i])
@@ -393,7 +460,9 @@ func loadPages() []*Page {
 func push() {
 	Info(statusRepoPush)
 
-	r, err := git.PlainOpen(".")
+	tDir := getTargetDir(false)
+
+	r, err := git.PlainOpen(tDir)
 	if err != nil {
 		Fail(err)
 	}
@@ -428,7 +497,9 @@ func readPage(filePath string) *Page {
 func save(commitMsg string) {
 	Info(statusRepoSave)
 
-	r, err := git.PlainOpen(".")
+	tDir := getTargetDir(false)
+
+	r, err := git.PlainOpen(tDir)
 	if err != nil {
 		Fail(err)
 	}
@@ -551,7 +622,8 @@ func (page *Page) Link() string {
 		"<code>%s</code> [%s](%s)",
 		page.PrettyDate(),
 		page.Title,
-		strings.Replace(page.FilePath, "docs/", "", -1))
+		filepath.Base(page.FilePath),
+	)
 }
 
 // PrettyDate returns a human-friendly representation of the CreatedAt date
