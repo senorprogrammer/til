@@ -62,6 +62,7 @@ commitMessage: "build, save, push"
 committerEmail: test@example.com
 committerName: "TIL Autobot"
 editor: "mvim"
+targetDirectory: "~/Documents/til"
 ```
 
 ## Execution

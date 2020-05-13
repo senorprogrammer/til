@@ -30,7 +30,7 @@ commitMessage: "build, save, push"
 committerEmail: test@example.com
 committerName: "TIL Autobot"
 editor: "mvim"
-targetDirectory: "."
+targetDirectory: "~/Documents/til"
 `
 
 	fileExtension = "md"
@@ -47,6 +47,7 @@ targetDirectory: "."
 	errConfigFileWrite  = "could not write the configuration file"
 	errConfigValueRead  = "could not read a required configuration value"
 	errNoTitle          = "title must not be blank"
+	errTargetDirCreate  = "could not create the target directories"
 
 	statusDone     = "done"
 	statusIdxBuild = "building index page"
@@ -94,20 +95,21 @@ func init() {
 
 func main() {
 	loadConfig()
+	buildTargetDirectory()
 
 	/* Flags */
 
 	flag.Parse()
 
 	if buildFlag {
-		build()
+		buildContent()
 		Victory(statusDone)
 	}
 
 	if saveFlag {
 		commitMsg := strings.Join(os.Args[2:], " ")
 
-		build()
+		buildContent()
 		save(commitMsg)
 		push()
 		Victory(statusDone)
@@ -129,7 +131,7 @@ func main() {
 	Info(pagePath)
 
 	// And rebuild the index and tag pages
-	build()
+	buildContent()
 
 	Victory(statusDone)
 }
@@ -238,9 +240,47 @@ func readConfigFile() {
 	globalConfig = cfg
 }
 
+/* -------------------- Target Directory -------------------- */
+
+// buildTargetDirectory verifies that the target directory, as specified in
+// the config file, exists and contains a /docs folder for writing pages to.
+// If these directories don't exist, it tries to create them
+func buildTargetDirectory() {
+	tDir := getTargetDir()
+
+	tDir += "/docs"
+
+	if _, err := os.Stat(tDir); os.IsNotExist(err) {
+		err := os.MkdirAll(tDir, os.ModePerm)
+		if err != nil {
+			Fail(errors.New(errTargetDirCreate))
+		}
+	}
+}
+
+// getTargetDir returns the absolute string path to the directory that the
+// content will be written to
+func getTargetDir() string {
+	tDir, err := globalConfig.String("targetDirectory")
+	if err != nil {
+		Fail(err)
+	}
+
+	if tDir[0] != '~' {
+		return tDir
+	}
+
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		Fail(errors.New(errConfigExpandPath))
+	}
+
+	return filepath.Join(dir, tDir[1:])
+}
+
 /* -------------------- Helper functions -------------------- */
 
-func build() {
+func buildContent() {
 	pages := loadPages()
 	tagMap := buildTagPages(pages)
 	buildIndexPage(pages, tagMap)
