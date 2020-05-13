@@ -1,6 +1,4 @@
-<p align="center">
-    <img src="./till.jpg?raw=true" title="till" alt="WTF" width="400" height="200" />
-</p>
+<p align="center"></p>
 
 # til
 
