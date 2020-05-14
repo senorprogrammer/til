@@ -1,6 +1,6 @@
 <p align="center"><img src="till_header.png" width="916" height="306" alt="til" title="til: jot it down" /></p>
 
-`til` is a fast, simple, command line-driven, mini-static site generator I use for quickly capturing notes about things I've learned. Two commands, (three if you're picky about your commit messages).
+`til` is a fast, simple, command line-driven, mini-static site generator I use for quickly capturing and publishing one-off notes. Two commands, (three if you're picky about your commit messages).
 
 # tl;dr
 
