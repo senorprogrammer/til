@@ -289,11 +289,11 @@ func buildContent() {
 	buildIndexPage(pages, tagMap)
 }
 
+// buildIndexPage creates the main index.md page that is the root of the site
 func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	Info(statusIdxBuild)
 
 	content := ""
-	prevPage := &Page{}
 
 	// Write the tag list into the top of the index
 	for _, tag := range tagMap.SortedTagNames() {
@@ -304,27 +304,11 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 		)
 	}
 
-	// Write the page list into the middle of the index
-	// This is sorted by month, in reverse-chronological order
-	for _, page := range pages {
-		if !page.IsContentPage() {
-			continue
-		}
-
-		// This breaks the page list up by month
-		if prevPage.CreatedMonth() != page.CreatedMonth() {
-			content += "\n\n"
-		}
-
-		content += fmt.Sprintf("* %s\n", page.Link())
-
-		prevPage = page
-	}
-
+	// Write the page list into the middle of the page
+	content += pagesToHTMLUnorderedList(pages)
 	content += fmt.Sprintf("\n")
 
 	// Write the footer content into the bottom of the index
-	content += fmt.Sprintf("\n")
 	content += fmt.Sprintf("\n")
 	content += footer()
 
@@ -339,6 +323,8 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	if err != nil {
 		Fail(err)
 	}
+
+	ll.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), filePath))
 }
 
 // buildTagPages creates the tag pages, with links to posts tagged with those names
@@ -357,13 +343,8 @@ func buildTagPages(pages []*Page) *TagMap {
 
 			content := fmt.Sprintf("## %s\n\n", tagName)
 
-			for _, tag := range tagMap.Get(tagName) {
-				for _, page := range tag.Pages {
-					if page.IsContentPage() {
-						content += fmt.Sprintf("* %s\n", page.Link())
-					}
-				}
-			}
+			// Write the page list into the middle of the page
+			content += pagesToHTMLUnorderedList(tagMap.PagesFor(tagName))
 
 			// Write the footer content into the bottom of the page
 			content += fmt.Sprintf("\n")
@@ -454,6 +435,30 @@ func loadPages() []*Page {
 	}
 
 	return pages
+}
+
+// pagesToHTMLUnorderedList creates the unordered list of page links that appear
+// on the index and tag pages
+func pagesToHTMLUnorderedList(pages []*Page) string {
+	content := ""
+	prevPage := &Page{}
+
+	for _, page := range pages {
+		if !page.IsContentPage() {
+			continue
+		}
+
+		// This breaks the page list up by month
+		if prevPage.CreatedMonth() != page.CreatedMonth() {
+			content += "\n"
+		}
+
+		content += fmt.Sprintf("* %s\n", page.Link())
+
+		prevPage = page
+	}
+
+	return content
 }
 
 // push pushes up to the remote git repo
@@ -715,6 +720,23 @@ func (tm *TagMap) Get(name string) []*Tag {
 // Len returns the number of tags in the map
 func (tm *TagMap) Len() int {
 	return len(tm.Tags)
+}
+
+// PagesFor returns a flattened slice of pages for a given tag name, sorted
+// in reverse-chronological order
+func (tm *TagMap) PagesFor(tagName string) []*Page {
+	pages := []*Page{}
+	tags := tm.Get(tagName)
+
+	for _, tag := range tags {
+		pages = append(pages, tag.Pages...)
+
+		sort.Slice(pages, func(i, j int) bool {
+			return pages[i].CreatedAt().After(pages[j].CreatedAt())
+		})
+	}
+
+	return pages
 }
 
 // SortedTagNames returns the tag names in alphabetical order
