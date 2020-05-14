@@ -1,4 +1,4 @@
-<p align="center"><img src="till_header.png" width="916" height="306" alt="til" title="til: jot it down" /></p>
+<p align="center"><img src="images/till_header.png" width="916" height="306" alt="til" title="til: jot it down" /></p>
 
 `til` is a fast, simple, command line-driven, mini-static site generator I use for quickly capturing and publishing one-off notes. Two commands, (three if you're picky about your commit messages).
 
@@ -26,6 +26,7 @@ And you're done.
     * [Building, saving, committing, and pushing](#building-saving-committing-and-pushing)
 * [Publishing to GitHub Pages](#publishing-to-github-pages)
 * [Live Example](#live-example)
+* [Frequently Unasked Questions](#frequently-unasked-questions)
 
 ## Installation
 
@@ -92,6 +93,8 @@ That new page will open in whichever editor you've defined in your config.
 
 Builds the index and tag pages, and leaves them uncommitted.
 
+<p align="center"><img src="images/til_build.png" width="600" height="213" alt="image of the build process" title="til -build" /></p>
+
 ### Building, saving, committing, and pushing
 
 ```bash
@@ -106,6 +109,8 @@ Builds the index and tag pages, commits everything to the git repo with the comm
 
 `-save` takes an optional commit message. If that message is supplied, it will be used as the commit message. If that message is not supplied, the `commitMessage` value in the config file will be used. If that value is not supplied, an error will be raised.
 
+<p align="center"><img src="images/til_save.png" width="600" height="259" alt="image of the save process" title="til -save" /></p>
+
 ## Publishing to GitHub Pages
 
 The generated output of `til` is such that if your `git remote` is configured to use GitHub, it should be fully compatible with GitHub Pages.
@@ -115,3 +120,13 @@ Follow the [GitHub Pages setup instructions](https://guides.github.com/features/
 ## Live Example
 
 An example published site: [https://senorprogrammer.github.io/tilde/](https://senorprogrammer.github.io/tilde/). And the raw source: [github.com/senorprogrammer/tilde](https://github.com/senorprogrammer/tilde)
+
+## Frequently Unasked Questions
+
+### Isn't this just (insert your favourite not this thing here)?
+
+Yep, probably. You could also likely do something like this with [Hugo](https://gohugo.io), [Jekyll](https://jekyllrb.com), bash scripts, emacs some custom lisp macros.... How cool is that?
+
+### Does it have search?
+
+It does not.
