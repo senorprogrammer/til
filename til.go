@@ -324,7 +324,7 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 		Fail(err)
 	}
 
-	ll.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), filePath))
+	Progress(filePath)
 }
 
 // buildTagPages creates the tag pages, with links to posts tagged with those names
@@ -363,7 +363,7 @@ func buildTagPages(pages []*Page) *TagMap {
 				Fail(err)
 			}
 
-			ll.Print(fmt.Sprintf("%s %s\n", Blue("\t->"), filePath))
+			Progress(filePath)
 		}(tagName, ll)
 	}
 
@@ -571,6 +571,11 @@ func Fail(err error) {
 // Info writes out an informative message
 func Info(msg string) {
 	ll.Print(fmt.Sprintf("%s %s", Green("->"), msg))
+}
+
+// Progress writes out a progress status message
+func Progress(msg string) {
+	ll.Print(fmt.Sprintf("\t%s %s\n", Blue("->"), msg))
 }
 
 // Victory writes out a victorious final message and then expires dramatically
