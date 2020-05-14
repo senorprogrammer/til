@@ -1,6 +1,8 @@
 <p align="center"><img src="till_header.png" width="916" height="306" alt="til" title="til: jot it down" /></p>
 
-`til` is a fast, simple, command line-driven, mini-static site generator I use for quickly capturing notes about things I've learned. Two commands, (three if you're picky about your commit messages).
+`til` is a fast, simple, command line-driven, mini-static site generator I use for quickly capturing and publishing one-off notes. Two commands, (three if you're picky about your commit messages).
+
+Example output: [https://github.com/senorprogrammer/tilde](https://github.com/senorprogrammer/tilde)
 
 # tl;dr
 
@@ -112,4 +114,4 @@ Follow the [GitHub Pages setup instructions](https://guides.github.com/features/
 
 ## Live Example
 
-An example published site: [https://senorprogrammer.github.io/tilde/](https://senorprogrammer.github.io/tilde/). And the raw source: [senorprogrammer/tilde](https://github.com/senorprogrammer/tilde)
+An example published site: [https://senorprogrammer.github.io/tilde/](https://senorprogrammer.github.io/tilde/). And the raw source: [github.com/senorprogrammer/tilde](https://github.com/senorprogrammer/tilde)
