@@ -1,6 +1,8 @@
 <p align="center"><img src="images/till_header.png" width="916" height="306" alt="til" title="til: jot it down" /></p>
 
-`til` is a fast, simple, command line-driven, mini-static site generator I use for quickly capturing and publishing one-off notes. Two commands, (three if you're picky about your commit messages).
+`til` is a fast, simple, command line-driven, mini-static site generator I use for quickly capturing and publishing one-off notes. 
+
+Only two commands, (three if you're picky about your commit messages).
 
 Example output: [https://github.com/senorprogrammer/tilde](https://github.com/senorprogrammer/tilde)
 
@@ -125,8 +127,12 @@ An example published site: [https://senorprogrammer.github.io/tilde/](https://se
 
 ### Isn't this just (insert your favourite not this thing here)?
 
-Yep, probably. You could also likely do something like this with [Hugo](https://gohugo.io), [Jekyll](https://jekyllrb.com), bash scripts, emacs some custom lisp macros.... How cool is that?
+Yep, probably. I'm sure you could also put something like this together with [Hugo](https://gohugo.io), or [Jekyll](https://jekyllrb.com), or bash scripts, or emacs and some lisp macros.... Cool, eh?
 
 ### Does it have search?
 
 It does not.
+
+### Does this work on Windows?
+
+Good question. No idea. Let me know?
