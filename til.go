@@ -538,8 +538,8 @@ func save(commitMsg string) {
 
 	commit, err := w.Commit(commitMsg, &git.CommitOptions{
 		Author: &object.Signature{
-			Name:  defaultCommitEmail,
-			Email: defaultCommitName,
+			Name:  defaultCommitName,
+			Email: defaultCommitEmail,
 			When:  time.Now(),
 		},
 	})
