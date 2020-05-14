@@ -6,7 +6,7 @@
 
 ```bash
 ❯ til New title here
-  ...
+  ...edit
 ❯ til -save
 ```
 
