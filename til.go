@@ -33,7 +33,6 @@ editor: ""
 targetDirectory: "~/Documents/til"
 `
 	defaultEditor = "open"
-
 	fileExtension = "md"
 
 	// A custom datetime format that plays nicely with GitHub Pages filename restrictions
@@ -66,9 +65,6 @@ var (
 
 	// Red writes red text
 	Red = Colour("\033[1;31m%s\033[0m")
-
-	// Yellow writes yellow text
-	Yellow = Colour("\033[1;33m%s\033[0m")
 )
 
 // globalConfig holds and makes available all the user-configurable
@@ -196,7 +192,7 @@ func makeConfigDir() {
 func makeConfigFile() {
 	cPath := getConfigPath()
 
-	fileInfo, err := os.Stat(cPath)
+	_, err := os.Stat(cPath)
 
 	if err != nil {
 		// Something went wrong trying to find the config file.
@@ -217,7 +213,7 @@ func makeConfigFile() {
 	}
 
 	// Let's double-check that the file's there now
-	fileInfo, err = os.Stat(cPath)
+	fileInfo, err := os.Stat(cPath)
 	if err != nil {
 		Fail(errors.New(errConfigFileAssert))
 	}
@@ -495,7 +491,7 @@ func readPage(filePath string) *Page {
 		Fail(err)
 	}
 
-	err = frontmatter.Unmarshal(([]byte)(data), page)
+	err = frontmatter.Unmarshal(data, page)
 	if err != nil {
 		Fail(err)
 	}
