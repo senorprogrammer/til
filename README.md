@@ -114,4 +114,4 @@ Follow the [GitHub Pages setup instructions](https://guides.github.com/features/
 
 ## Live Example
 
-An example published site: [https://senorprogrammer.github.io/tilde/](https://senorprogrammer.github.io/tilde/). And the raw source: [senorprogrammer/tilde](https://github.com/senorprogrammer/tilde)
+An example published site: [https://senorprogrammer.github.io/tilde/](https://senorprogrammer.github.io/tilde/). And the raw source: [github.com/senorprogrammer/tilde](https://github.com/senorprogrammer/tilde)
