@@ -29,9 +29,10 @@ const (
 commitMessage: "build, save, push"
 committerEmail: test@example.com
 committerName: "TIL Autobot"
-editor: "mvim"
+editor: ""
 targetDirectory: "~/Documents/til"
 `
+	defaultEditor = "open"
 
 	fileExtension = "md"
 
@@ -407,9 +408,10 @@ func createNewPage(title string) string {
 	}
 
 	// Tell the OS to open the newly-created page in the editor (as specified in the config)
-	editor, err1 := globalConfig.String("editor")
-	if err1 != nil {
-		Fail(err1)
+	// If there's no editor explicitly defined by the user, tell the OS to try and open it
+	editor := globalConfig.UString("editor", defaultEditor)
+	if editor == "" {
+		editor = defaultEditor
 	}
 
 	cmd := exec.Command(editor, filePath)
