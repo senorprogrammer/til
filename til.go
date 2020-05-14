@@ -187,6 +187,8 @@ func makeConfigDir() {
 		if err != nil {
 			Fail(errors.New(errConfigDirCreate))
 		}
+
+		Progress(fmt.Sprintf("created %s", cDir))
 	}
 }
 
@@ -205,6 +207,7 @@ func makeConfigFile() {
 				// That was not fine
 				Fail(errors.New(errConfigFileCreate))
 			}
+
 		} else {
 			// But wait, it's some kind of other error. What kind?
 			// I dunno, but it's probably bad so die
@@ -224,6 +227,8 @@ func makeConfigFile() {
 		if ioutil.WriteFile(cPath, []byte(defaultConfig), 0600) != nil {
 			Fail(errors.New(errConfigFileWrite))
 		}
+
+		Progress(fmt.Sprintf("created %s", cPath))
 	}
 }
 
