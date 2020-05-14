@@ -2,6 +2,8 @@
 
 `til` is a fast, simple, command line-driven, mini-static site generator I use for quickly capturing and publishing one-off notes. Two commands, (three if you're picky about your commit messages).
 
+Example output: [https://senorprogrammer.github.io/tilde/](https://senorprogrammer.github.io/tilde/)
+
 # tl;dr
 
 ```bash
