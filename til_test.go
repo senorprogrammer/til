@@ -22,9 +22,9 @@ func Test_Page_CreatedAt(t *testing.T) {
 
 	actual := page.CreatedAt()
 
-	assert.Equal(t, 2020, int(actual.Year()))
+	assert.Equal(t, 2020, actual.Year())
 	assert.Equal(t, 5, int(actual.Month()))
-	assert.Equal(t, 7, int(actual.Day()))
+	assert.Equal(t, 7, actual.Day())
 }
 
 func Test_Page_CreatedMonth(t *testing.T) {
