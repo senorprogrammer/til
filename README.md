@@ -1,6 +1,6 @@
 <p align="center"><img src="images/till_header.png" width="916" height="306" alt="til" title="til: jot it down" /></p>
 
-`til` is a fast, simple, command line-driven, mini-static site generator I use for quickly capturing and publishing one-off notes. 
+`til` is a fast, simple, command line-driven, mini-static site generator for quickly capturing and publishing one-off notes. 
 
 All in only two commands.
 
