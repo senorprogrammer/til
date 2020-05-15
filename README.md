@@ -6,6 +6,8 @@ Only two commands, (three if you're picky about your commit messages).
 
 Example output: [https://github.com/senorprogrammer/tilde](https://github.com/senorprogrammer/tilde)
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/senorprogrammer/til)](https://goreportcard.com/report/github.com/senorprogrammer/til)
+
 # tl;dr
 
 ```bash
