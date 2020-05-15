@@ -244,7 +244,7 @@ func Test_TagMap_Get(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		pages := []*Page{&Page{TagsStr: "go"}}
+		pages := []*Page{{TagsStr: "go"}}
 		tMap := NewTagMap(pages)
 
 		actual := tMap.Get(tt.input)
@@ -286,7 +286,7 @@ func Test_TagMap_Len(t *testing.T) {
 }
 
 func Test_TagMap_SortedTagNames(t *testing.T) {
-	pages := []*Page{&Page{TagsStr: "go, ada, lua"}}
+	pages := []*Page{{TagsStr: "go, ada, lua"}}
 	tMap := NewTagMap(pages)
 
 	expected := []string{"ada", "go", "lua"}
