@@ -117,7 +117,7 @@ func main() {
 	// Every non-dash argument is considered a part of the title. If there are no arguments, we have no title
 	// Can't have a page without a title
 	if len(os.Args[1:]) < 1 {
-		Fail(errors.New(errNoTitle))
+		Defeat(errors.New(errNoTitle))
 	}
 
 	title := strings.Title(strings.Join(os.Args[1:], " "))
@@ -162,7 +162,7 @@ func getConfigDir() string {
 
 	dir, err := os.UserHomeDir()
 	if err != nil {
-		Fail(errors.New(errConfigExpandPath))
+		Defeat(errors.New(errConfigExpandPath))
 	}
 
 	return filepath.Join(dir, cDir[1:])
@@ -182,7 +182,7 @@ func makeConfigDir() {
 	if _, err := os.Stat(cDir); os.IsNotExist(err) {
 		err := os.MkdirAll(cDir, os.ModePerm)
 		if err != nil {
-			Fail(errors.New(errConfigDirCreate))
+			Defeat(errors.New(errConfigDirCreate))
 		}
 
 		Progress(fmt.Sprintf("created %s", cDir))
@@ -202,27 +202,27 @@ func makeConfigFile() {
 			_, err = os.Create(cPath)
 			if err != nil {
 				// That was not fine
-				Fail(errors.New(errConfigFileCreate))
+				Defeat(errors.New(errConfigFileCreate))
 			}
 
 		} else {
 			// But wait, it's some kind of other error. What kind?
 			// I dunno, but it's probably bad so die
-			Fail(err)
+			Defeat(err)
 		}
 	}
 
 	// Let's double-check that the file's there now
 	fileInfo, err := os.Stat(cPath)
 	if err != nil {
-		Fail(errors.New(errConfigFileAssert))
+		Defeat(errors.New(errConfigFileAssert))
 	}
 
 	// Write the default config, but only if the file is empty.
 	// Don't want to stop on any non-default values the user has written in there
 	if fileInfo.Size() == 0 {
 		if ioutil.WriteFile(cPath, []byte(defaultConfig), 0600) != nil {
-			Fail(errors.New(errConfigFileWrite))
+			Defeat(errors.New(errConfigFileWrite))
 		}
 
 		Progress(fmt.Sprintf("created %s", cPath))
@@ -236,7 +236,7 @@ func readConfigFile() {
 
 	cfg, err := config.ParseYamlFile(cPath)
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	globalConfig = cfg
@@ -253,7 +253,7 @@ func buildTargetDirectory() {
 	if _, err := os.Stat(tDir); os.IsNotExist(err) {
 		err := os.MkdirAll(tDir, os.ModePerm)
 		if err != nil {
-			Fail(errors.New(errTargetDirCreate))
+			Defeat(errors.New(errTargetDirCreate))
 		}
 	}
 }
@@ -268,7 +268,7 @@ func getTargetDir(withDocsDir bool) string {
 
 	tDir, err := globalConfig.String("targetDirectory")
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	if tDir[0] != '~' {
@@ -277,7 +277,7 @@ func getTargetDir(withDocsDir bool) string {
 
 	dir, err := os.UserHomeDir()
 	if err != nil {
-		Fail(errors.New(errConfigExpandPath))
+		Defeat(errors.New(errConfigExpandPath))
 	}
 
 	return filepath.Join(dir, tDir[1:], docsBit)
@@ -323,7 +323,7 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 
 	err := ioutil.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	Progress(filePath)
@@ -362,7 +362,7 @@ func buildTagPages(pages []*Page) *TagMap {
 
 			err := ioutil.WriteFile(filePath, []byte(content), 0644)
 			if err != nil {
-				Fail(err)
+				Defeat(err)
 			}
 
 			Progress(filePath)
@@ -400,7 +400,7 @@ func createNewPage(title string) string {
 
 	err := ioutil.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	// Tell the OS to open the newly-created page in the editor (as specified in the config)
@@ -413,7 +413,7 @@ func createNewPage(title string) string {
 	cmd := exec.Command(editor, filePath)
 	err = cmd.Run()
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	return filePath
@@ -472,12 +472,12 @@ func push() {
 
 	r, err := git.PlainOpen(tDir)
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	err = r.Push(&git.PushOptions{})
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 }
 
@@ -488,12 +488,12 @@ func readPage(filePath string) *Page {
 
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	err = frontmatter.Unmarshal(data, page)
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	page.FilePath = filePath
@@ -509,24 +509,24 @@ func save(commitMsg string) {
 
 	r, err := git.PlainOpen(tDir)
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	w, err := r.Worktree()
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	_, err = w.Add(".")
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	defaultCommitMsg, err1 := globalConfig.String("commitMessage")
 	defaultCommitEmail, err2 := globalConfig.String("committerEmail")
 	defaultCommitName, err3 := globalConfig.String("committerName")
 	if err1 != nil || err2 != nil || err3 != nil {
-		Fail(errors.New(errConfigValueRead))
+		Defeat(errors.New(errConfigValueRead))
 	}
 
 	if commitMsg == "" {
@@ -544,12 +544,12 @@ func save(commitMsg string) {
 		},
 	})
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	obj, err := r.CommitObject(commit)
 	if err != nil {
-		Fail(err)
+		Defeat(err)
 	}
 
 	Info(fmt.Sprintf("committed with '%s' (%.7s)", obj.Message, obj.Hash.String()))
@@ -566,8 +566,8 @@ func Colour(colorString string) func(...interface{}) string {
 	return sprint
 }
 
-// Fail writes out an error message
-func Fail(err error) {
+// Defeat writes out an error message
+func Defeat(err error) {
 	ll.Fatal(fmt.Sprintf("%s %s", Red("✘"), err.Error()))
 }
 
