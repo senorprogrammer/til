@@ -1,0 +1,22 @@
+env:
+  - GO111MODULE=on
+  - GOPROXY="https://proxy.golang.org,direct"
+
+archives:
+  - id: default
+    wrap_in_directory: true
+
+builds:
+  - binary: til
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - 386
+      - amd64
+      - arm
+      - arm64
+
+before:
+  hooks:
+    - make build
