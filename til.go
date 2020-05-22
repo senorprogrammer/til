@@ -40,14 +40,16 @@ targetDirectory: "~/Documents/til"
 
 	/* -------------------- Messages -------------------- */
 
-	errConfigDirCreate  = "could not create the configuration directory"
-	errConfigExpandPath = "could not expand the config directory"
-	errConfigFileAssert = "could not assert the configuration file exists"
-	errConfigFileCreate = "could not create the configuration file"
-	errConfigFileWrite  = "could not write the configuration file"
-	errConfigValueRead  = "could not read a required configuration value"
-	errNoTitle          = "title must not be blank"
-	errTargetDirCreate  = "could not create the target directories"
+	errConfigDirCreate    = "could not create the configuration directory"
+	errConfigExpandPath   = "could not expand the config directory"
+	errConfigFileAssert   = "could not assert the configuration file exists"
+	errConfigFileCreate   = "could not create the configuration file"
+	errConfigFileWrite    = "could not write the configuration file"
+	errConfigValueRead    = "could not read a required configuration value"
+	errNoTitle            = "title must not be blank"
+	errTargetDirCreate    = "could not create the target directories"
+	errTargetDirFlag      = "multiple target directories defined, but no -t value provided"
+	errTargetDirUndefined = "target directory is undefined or misconfigured in config"
 
 	statusDone     = "done"
 	statusIdxBuild = "building index page"
@@ -79,6 +81,7 @@ var ll *log.Logger
 
 var buildFlag bool
 var saveFlag bool
+var targetDirFlag string
 
 func init() {
 	ll = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
@@ -88,6 +91,9 @@ func init() {
 
 	flag.BoolVar(&saveFlag, "s", false, "builds, saves, and pushes (short-hand)")
 	flag.BoolVar(&saveFlag, "save", false, "builds, saves, and pushes")
+
+	flag.StringVar(&targetDirFlag, "t", "", "specifies the target directory key (short-hand)")
+	flag.StringVar(&targetDirFlag, "target", "", "specifies the target directory key")
 }
 
 func main() {
@@ -114,13 +120,12 @@ func main() {
 
 	/* Page creation */
 
-	// Every non-dash argument is considered a part of the title. If there are no arguments, we have no title
-	// Can't have a page without a title
-	if len(os.Args[1:]) < 1 {
+	title := parseTitle(targetDirFlag, os.Args)
+	if title == "" {
+		// Every non-dash argument is considered a part of the title. If there are no arguments, we have no title
+		// Can't have a page without a title
 		Defeat(errors.New(errNoTitle))
 	}
-
-	title := strings.Title(strings.Join(os.Args[1:], " "))
 
 	pagePath := createNewPage(title)
 
@@ -266,15 +271,55 @@ func getTargetDir(withDocsDir bool) string {
 		docsBit = "/docs"
 	}
 
-	tDir, err := globalConfig.String("targetDirectory")
+	// Target directories are defined in the config file as a map of
+	// identifier : target directory
+	// Example:
+	//		targetDirectories:
+	//			a: ~/Documents/blog
+	//			b: ~/Documents/notes
+	uDirs, err := globalConfig.Map("targetDirectories")
 	if err != nil {
 		Defeat(err)
 	}
 
+	// config returns a map of [string]interface{} which is helpful on the
+	// left side, not so much on the right side. Convert the right to strings
+	tDirs := make(map[string]string, len(uDirs))
+	for k, dir := range uDirs {
+		tDirs[k] = dir.(string)
+	}
+
+	// Extracts the dir we want operate against by using the value of the
+	// -target flag passed in. If no value was passed in, AND we only have one
+	// entry in the map, use that entry. If no value was passed in and there
+	// are more than one entry in the map, error out
+	tDir := ""
+
+	if len(tDirs) == 1 {
+		for _, dir := range tDirs {
+			tDir = dir
+		}
+	} else {
+		if targetDirFlag == "" {
+			Defeat(errors.New(errTargetDirFlag))
+		}
+
+		tDir = tDirs[targetDirFlag]
+	}
+
+	if tDir == "" {
+		Defeat(errors.New(errTargetDirUndefined))
+	}
+
+	// If we're not using a path relative to the user's home directory,
+	// take the config value as a fully-qualified path and just append the
+	// name of the write dir to it
 	if tDir[0] != '~' {
 		return tDir + docsBit
 	}
 
+	// We are pathing relative to the home directory, so figure out the
+	// absolute path for that
 	dir, err := os.UserHomeDir()
 	if err != nil {
 		Defeat(errors.New(errConfigExpandPath))
@@ -462,6 +507,15 @@ func pagesToHTMLUnorderedList(pages []*Page) string {
 	}
 
 	return content
+}
+
+func parseTitle(targetFlag string, args []string) string {
+	titleOffset := 3
+	if targetFlag == "" {
+		titleOffset = 1
+	}
+
+	return strings.Title(strings.Join(args[titleOffset:], " "))
 }
 
 // push pushes up to the remote git repo
