@@ -80,6 +80,7 @@ var globalConfig *config.Config
 var ll *log.Logger
 
 var buildFlag bool
+var listFlag bool
 var saveFlag bool
 var targetDirFlag string
 
@@ -88,6 +89,9 @@ func init() {
 
 	flag.BoolVar(&buildFlag, "b", false, "builds the index and tag pages (short-hand)")
 	flag.BoolVar(&buildFlag, "build", false, "builds the index and tag pages")
+
+	flag.BoolVar(&listFlag, "l", false, "lists the configured target directories (short-hand)")
+	flag.BoolVar(&listFlag, "list", false, "lists the configured target directories")
 
 	flag.BoolVar(&saveFlag, "s", false, "builds, saves, and pushes (short-hand)")
 	flag.BoolVar(&saveFlag, "save", false, "builds, saves, and pushes")
@@ -100,13 +104,17 @@ func main() {
 	flag.Parse()
 
 	loadConfig()
-	buildTargetDirectory()
 
 	/* Flaghandling */
 	/* I personally think "flag handling" should be spelled flag-handling
 	   but precedence has been set and we will defer to it.
 	   According to wiktionary.org, "stick-handling" is correctly spelled
 	   "stickhandling", so here we are, abomination enshrined */
+
+	if listFlag {
+		listTargetDirectories(globalConfig)
+		Victory(statusDone)
+	}
 
 	if buildFlag {
 		buildContent()
@@ -121,6 +129,8 @@ func main() {
 		push()
 		Victory(statusDone)
 	}
+
+	buildTargetDirectory()
 
 	/* Page creation */
 
@@ -495,6 +505,19 @@ func createNewPage(title string) string {
 	}
 
 	return filePath
+}
+
+// listTargetDirectories writes the list of target directories in the configuration
+// out to the terminal
+func listTargetDirectories(cfg *config.Config) {
+	dirMap, err := cfg.Map("targetDirectories")
+	if err != nil {
+		Defeat(err)
+	}
+
+	for key, dir := range dirMap {
+		Info(fmt.Sprintf("%6s\t%s\n", key, dir.(string)))
+	}
 }
 
 // loadPages reads the page files from disk (in reverse chronological order) and
