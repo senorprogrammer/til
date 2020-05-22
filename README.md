@@ -70,13 +70,17 @@ Open `~/.config/til/config.yml`, change the following entries, and save it:
     * committerEmail
     * committerName
     * editor
-    * targetDirectory
+    * targetDirectories
     
 `committerEmail` and `committerName` are the values `til` will use to commit changes with when you run `til -save`. 
 
 `editor` is the text editor `til` will open your file in when you run `til [some title here]`.
 
-`targetDirectory` is where `til` will write your files to. If the target directory does not exist, `til` will try to create it. 
+`targetDirectories` defines the locations that `til` will write your files to. If a specified target directory does not exist, `til` will try to create it. This is a map of key/value pairs, where the "key" defines the value to pass in using the `-target` flag, and the "value" is the path to the directory.
+
+If only one target directory is defined in the configuration, the `-target` flag can be ommitted from all commands. 
+If multiple target diretories are defined in the configuration, all commands must include the `-target` flag specifying 
+which target directory to operate against.
 
 ### Config Example
 
@@ -86,7 +90,9 @@ commitMessage: "build, save, push"
 committerEmail: test@example.com
 committerName: "TIL Autobot"
 editor: "mvim"
-targetDirectory: "~/Documents/til"
+targetDirectories: 
+    a: ~/Documents/notes
+    b: ~/Documents/blog
 ```
 
 ## Usage
@@ -95,8 +101,17 @@ targetDirectory: "~/Documents/til"
 
 ### Creating a new page
 
+With one target directory defined in the configuration:
+
 ```bash
 ❯ til New title here
+2020-04-20T14-52-57-new-title-here.md
+```
+
+With multiple target directories defined:
+
+```bash
+❯ til -target a New title here
 2020-04-20T14-52-57-new-title-here.md
 ```
 
@@ -104,8 +119,16 @@ That new page will open in whichever editor you've defined in your config.
 
 ### Building static pages
 
+With one target directory defined in the configuration:
+
 ```bash
 ❯ til -build
+```
+
+With multiple target directories defined:
+
+```bash
+❯ til -target a -build
 ```
 
 Builds the index and tag pages, and leaves them uncommitted.
@@ -114,15 +137,23 @@ Builds the index and tag pages, and leaves them uncommitted.
 
 ### Building, saving, committing, and pushing
 
+With one target directory defined in the configuration:
+
 ```bash
 ❯ til -save [optional commit message]
 ```
 
+With multiple target directories defined:
+
+```bash
+❯ til -target a -save [optional commit message]
+```
+
 Builds the index and tag pages, commits everything to the git repo with the commit message you've defined in your config, and pushes it all up to the remote repo.
 
-`-save` makes a hard assumption that your `targetDirectory` is under version control, controlled by `git`. It is highly recommended that you do this.
+`-save` makes a hard assumption that your target directory is under version control, controlled by `git`. It is recommended that you do this.
 
-`-save` also makes a soft assumption that your `targetDirectory` has `remote` set to GitHub (but it should work with `remote` set to anywhere).
+`-save` also makes a soft assumption that your target directory has `remote` set to GitHub (but it should work with `remote` set to anywhere).
 
 `-save` takes an optional commit message. If that message is supplied, it will be used as the commit message. If that message is not supplied, the `commitMessage` value in the config file will be used. If that value is not supplied, an error will be raised.
 

@@ -257,7 +257,7 @@ func readConfigFile() {
 // the config file, exists and contains a /docs folder for writing pages to.
 // If these directories don't exist, it tries to create them
 func buildTargetDirectory() {
-	tDir := getTargetDir(true)
+	tDir := getTargetDir(globalConfig, true)
 
 	if _, err := os.Stat(tDir); os.IsNotExist(err) {
 		err := os.MkdirAll(tDir, os.ModePerm)
@@ -269,7 +269,7 @@ func buildTargetDirectory() {
 
 // getTargetDir returns the absolute string path to the directory that the
 // content will be written to
-func getTargetDir(withDocsDir bool) string {
+func getTargetDir(cfg *config.Config, withDocsDir bool) string {
 	docsBit := ""
 	if withDocsDir {
 		docsBit = "/docs"
@@ -281,7 +281,7 @@ func getTargetDir(withDocsDir bool) string {
 	//		targetDirectories:
 	//			a: ~/Documents/blog
 	//			b: ~/Documents/notes
-	uDirs, err := globalConfig.Map("targetDirectories")
+	uDirs, err := cfg.Map("targetDirectories")
 	if err != nil {
 		Defeat(err)
 	}
@@ -366,7 +366,7 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	// And write the file to disk
 	filePath := fmt.Sprintf(
 		"%s/index.%s",
-		getTargetDir(true),
+		getTargetDir(globalConfig, true),
 		fileExtension,
 	)
 
@@ -404,7 +404,7 @@ func buildTagPages(pages []*Page) *TagMap {
 			// And write the file to disk
 			filePath := fmt.Sprintf(
 				"%s/%s.%s",
-				getTargetDir(true),
+				getTargetDir(globalConfig, true),
 				tagName,
 				fileExtension,
 			)
@@ -441,7 +441,7 @@ func createNewPage(title string) string {
 	// Write out the stub file, explode if we can't do that
 	filePath := fmt.Sprintf(
 		"%s/%s-%s.%s",
-		getTargetDir(true),
+		getTargetDir(globalConfig, true),
 		pathDate,
 		strings.ReplaceAll(strings.ToLower(title), " ", "-"),
 		fileExtension,
@@ -476,7 +476,7 @@ func loadPages() []*Page {
 	filePaths, _ := filepath.Glob(
 		fmt.Sprintf(
 			"%s/*.%s",
-			getTargetDir(true),
+			getTargetDir(globalConfig, true),
 			fileExtension,
 		),
 	)
@@ -526,7 +526,7 @@ func parseTitle(targetFlag string, args []string) string {
 func push() {
 	Info(statusRepoPush)
 
-	tDir := getTargetDir(false)
+	tDir := getTargetDir(globalConfig, false)
 
 	r, err := git.PlainOpen(tDir)
 	if err != nil {
@@ -563,7 +563,7 @@ func readPage(filePath string) *Page {
 func save(commitMsg string) {
 	Info(statusRepoSave)
 
-	tDir := getTargetDir(false)
+	tDir := getTargetDir(globalConfig, false)
 
 	r, err := git.PlainOpen(tDir)
 	if err != nil {
