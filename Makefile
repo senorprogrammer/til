@@ -29,17 +29,7 @@ install:
 
 ## lint: runs a number of code quality checks against the source code
 lint:
-	@echo "\033[35mhttps://github.com/kisielk/errcheck\033[0m"
-	errcheck ./til.go
-
-	@echo "\033[35mhttps://golang.org/cmd/vet/k\033[0m"
-	go vet ./til.go
-
-	@echo "\033[35m# https://staticcheck.io/docs/k\033[0m"
-	staticcheck ./til.go
-
-	@echo "\033[35m# https://github.com/mdempsky/unconvert\033[0m"
-	unconvert ./...
+	golangci-lint run
 
 ## test: runs the test suite
 test: build

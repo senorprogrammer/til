@@ -357,10 +357,10 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 
 	// Write the page list into the middle of the page
 	content += pagesToHTMLUnorderedList(pages)
-	content += fmt.Sprintf("\n")
+	content += "\n"
 
 	// Write the footer content into the bottom of the index
-	content += fmt.Sprintf("\n")
+	content += "\n"
 	content += footer()
 
 	// And write the file to disk
@@ -398,7 +398,7 @@ func buildTagPages(pages []*Page) *TagMap {
 			content += pagesToHTMLUnorderedList(tagMap.PagesFor(tagName))
 
 			// Write the footer content into the bottom of the page
-			content += fmt.Sprintf("\n")
+			content += "\n"
 			content += footer()
 
 			// And write the file to disk
