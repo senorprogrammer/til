@@ -153,7 +153,7 @@ func loadConfig() {
 // getConfigDir returns the string path to the directory that should
 // contain the configuration file.
 // It tries to be XDG-compatible
-func getConfigDir() string {
+func getConfigDir() (string, error) {
 	cDir := os.Getenv("XDG_CONFIG_HOME")
 	if cDir == "" {
 		cDir = tilConfigDir
@@ -166,27 +166,32 @@ func getConfigDir() string {
 	// do not mess with it (because doing so makes the archlinux people
 	// very cranky)
 	if cDir[0] != '~' {
-		return cDir
+		return cDir, nil
 	}
 
 	dir, err := os.UserHomeDir()
 	if err != nil {
-		Defeat(errors.New(errConfigExpandPath))
+		return "", errors.New(errConfigExpandPath)
 	}
 
-	return filepath.Join(dir, cDir[1:])
+	return filepath.Join(dir, cDir[1:]), nil
 }
 
 // getConfigPath returns the string path to the configuration file
-func getConfigPath() string {
-	cDir := getConfigDir()
-	cPath := fmt.Sprintf("%s/%s", cDir, tilConfigFile)
+func getConfigPath() (string, error) {
+	cDir, err := getConfigDir()
+	if err != nil {
+		return "", err
+	}
 
-	return cPath
+	return fmt.Sprintf("%s/%s", cDir, tilConfigFile), nil
 }
 
 func makeConfigDir() {
-	cDir := getConfigDir()
+	cDir, err := getConfigDir()
+	if err != nil {
+		Defeat(err)
+	}
 
 	if _, err := os.Stat(cDir); os.IsNotExist(err) {
 		err := os.MkdirAll(cDir, os.ModePerm)
@@ -199,9 +204,12 @@ func makeConfigDir() {
 }
 
 func makeConfigFile() {
-	cPath := getConfigPath()
+	cPath, err := getConfigPath()
+	if err != nil {
+		Defeat(err)
+	}
 
-	_, err := os.Stat(cPath)
+	_, err = os.Stat(cPath)
 
 	if err != nil {
 		// Something went wrong trying to find the config file.
@@ -241,7 +249,10 @@ func makeConfigFile() {
 // readConfigFile reads the contents of the config file and jams them
 // into the global config variable
 func readConfigFile() {
-	cPath := getConfigPath()
+	cPath, err := getConfigPath()
+	if err != nil {
+		Defeat(err)
+	}
 
 	cfg, err := config.ParseYamlFile(cPath)
 	if err != nil {
@@ -257,7 +268,10 @@ func readConfigFile() {
 // the config file, exists and contains a /docs folder for writing pages to.
 // If these directories don't exist, it tries to create them
 func buildTargetDirectory() {
-	tDir := getTargetDir(globalConfig, true)
+	tDir, err := getTargetDir(globalConfig, true)
+	if err != nil {
+		Defeat(err)
+	}
 
 	if _, err := os.Stat(tDir); os.IsNotExist(err) {
 		err := os.MkdirAll(tDir, os.ModePerm)
@@ -269,7 +283,7 @@ func buildTargetDirectory() {
 
 // getTargetDir returns the absolute string path to the directory that the
 // content will be written to
-func getTargetDir(cfg *config.Config, withDocsDir bool) string {
+func getTargetDir(cfg *config.Config, withDocsDir bool) (string, error) {
 	docsBit := ""
 	if withDocsDir {
 		docsBit = "/docs"
@@ -283,7 +297,7 @@ func getTargetDir(cfg *config.Config, withDocsDir bool) string {
 	//			b: ~/Documents/notes
 	uDirs, err := cfg.Map("targetDirectories")
 	if err != nil {
-		Defeat(err)
+		return "", err
 	}
 
 	// config returns a map of [string]interface{} which is helpful on the
@@ -305,31 +319,31 @@ func getTargetDir(cfg *config.Config, withDocsDir bool) string {
 		}
 	} else {
 		if targetDirFlag == "" {
-			Defeat(errors.New(errTargetDirFlag))
+			return "", errors.New(errTargetDirFlag)
 		}
 
 		tDir = tDirs[targetDirFlag]
 	}
 
 	if tDir == "" {
-		Defeat(errors.New(errTargetDirUndefined))
+		return "", errors.New(errTargetDirUndefined)
 	}
 
 	// If we're not using a path relative to the user's home directory,
 	// take the config value as a fully-qualified path and just append the
 	// name of the write dir to it
 	if tDir[0] != '~' {
-		return tDir + docsBit
+		return tDir + docsBit, nil
 	}
 
 	// We are pathing relative to the home directory, so figure out the
 	// absolute path for that
 	dir, err := os.UserHomeDir()
 	if err != nil {
-		Defeat(errors.New(errConfigExpandPath))
+		return "", errors.New(errConfigExpandPath)
 	}
 
-	return filepath.Join(dir, tDir[1:], docsBit)
+	return filepath.Join(dir, tDir[1:], docsBit), nil
 }
 
 /* -------------------- Helper functions -------------------- */
@@ -364,13 +378,18 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	content += footer()
 
 	// And write the file to disk
+	tDir, err := getTargetDir(globalConfig, true)
+	if err != nil {
+		Defeat(err)
+	}
+
 	filePath := fmt.Sprintf(
 		"%s/index.%s",
-		getTargetDir(globalConfig, true),
+		tDir,
 		fileExtension,
 	)
 
-	err := ioutil.WriteFile(filePath, []byte(content), 0644)
+	err = ioutil.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
 		Defeat(err)
 	}
@@ -402,14 +421,19 @@ func buildTagPages(pages []*Page) *TagMap {
 			content += footer()
 
 			// And write the file to disk
+			tDir, err := getTargetDir(globalConfig, true)
+			if err != nil {
+				Defeat(err)
+			}
+
 			filePath := fmt.Sprintf(
 				"%s/%s.%s",
-				getTargetDir(globalConfig, true),
+				tDir,
 				tagName,
 				fileExtension,
 			)
 
-			err := ioutil.WriteFile(filePath, []byte(content), 0644)
+			err = ioutil.WriteFile(filePath, []byte(content), 0644)
 			if err != nil {
 				Defeat(err)
 			}
@@ -439,15 +463,20 @@ func createNewPage(title string) string {
 	content := frontMatter + fmt.Sprintf("# %s\n\n\n", title)
 
 	// Write out the stub file, explode if we can't do that
+	tDir, err := getTargetDir(globalConfig, true)
+	if err != nil {
+		Defeat(err)
+	}
+
 	filePath := fmt.Sprintf(
 		"%s/%s-%s.%s",
-		getTargetDir(globalConfig, true),
+		tDir,
 		pathDate,
 		strings.ReplaceAll(strings.ToLower(title), " ", "-"),
 		fileExtension,
 	)
 
-	err := ioutil.WriteFile(filePath, []byte(content), 0644)
+	err = ioutil.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
 		Defeat(err)
 	}
@@ -473,10 +502,15 @@ func createNewPage(title string) string {
 func loadPages() []*Page {
 	pages := []*Page{}
 
+	tDir, err := getTargetDir(globalConfig, true)
+	if err != nil {
+		Defeat(err)
+	}
+
 	filePaths, _ := filepath.Glob(
 		fmt.Sprintf(
 			"%s/*.%s",
-			getTargetDir(globalConfig, true),
+			tDir,
 			fileExtension,
 		),
 	)
@@ -526,7 +560,10 @@ func parseTitle(targetFlag string, args []string) string {
 func push() {
 	Info(statusRepoPush)
 
-	tDir := getTargetDir(globalConfig, false)
+	tDir, err := getTargetDir(globalConfig, false)
+	if err != nil {
+		Defeat(err)
+	}
 
 	r, err := git.PlainOpen(tDir)
 	if err != nil {
@@ -563,7 +600,10 @@ func readPage(filePath string) *Page {
 func save(commitMsg string) {
 	Info(statusRepoSave)
 
-	tDir := getTargetDir(globalConfig, false)
+	tDir, err := getTargetDir(globalConfig, false)
+	if err != nil {
+		Defeat(err)
+	}
 
 	r, err := git.PlainOpen(tDir)
 	if err != nil {

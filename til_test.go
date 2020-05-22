@@ -3,49 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/olebedev/config"
 	"github.com/stretchr/testify/assert"
 )
-
-/* -------------------- Target Directory -------------------- */
-
-func Test_getTargetDir(t *testing.T) {
-	tests := []struct {
-		name         string
-		config       *config.Config
-		withDocsDir  bool
-		expectedPath string
-		expectedErr  error
-	}{
-		{
-			name: "with no targetDirectories config key",
-		},
-		{
-			name: "with no target directories defined",
-		},
-		{
-			name: "with one target directory defined",
-		},
-		{
-			name: "with multiple target directories defined and invalid key",
-		},
-		{
-			name: "with multiple target directories defined and valid key",
-		},
-		{
-			name: "with a home directory-relative path",
-		},
-		{
-			name: "with an absolute path",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-		})
-	}
-}
 
 /* -------------------- More Helper Functions -------------------- */
 
