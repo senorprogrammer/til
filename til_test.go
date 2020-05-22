@@ -6,6 +6,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+/* -------------------- Configuration -------------------- */
+
+func Test_getConfigPath(t *testing.T) {
+	actual, err := getConfigPath()
+
+	assert.Contains(t, actual, "config.yml")
+	assert.NoError(t, err)
+}
+
 /* -------------------- More Helper Functions -------------------- */
 
 func Test_Colour(t *testing.T) {
