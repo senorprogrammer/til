@@ -48,7 +48,7 @@ targetDirectory: "~/Documents/til"
 	errConfigValueRead    = "could not read a required configuration value"
 	errNoTitle            = "title must not be blank"
 	errTargetDirCreate    = "could not create the target directories"
-	errTargetDirFlag      = "multiple target directories defined, but no -t value provided"
+	errTargetDirFlag      = "multiple target directories defined, no -t value provided"
 	errTargetDirUndefined = "target directory is undefined or misconfigured in config"
 
 	statusDone     = "done"
@@ -97,12 +97,16 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
+
 	loadConfig()
 	buildTargetDirectory()
 
-	/* Flags */
-
-	flag.Parse()
+	/* Flaghandling */
+	/* I personally think "flag handling" should be spelled flag-handling
+	   but precedence has been set and we will defer to it.
+	   According to wiktionary.org, "stick-handling" is correctly spelled
+	   "stickhandling", so here we are, abomination enshrined */
 
 	if buildFlag {
 		buildContent()
@@ -292,7 +296,7 @@ func getTargetDir(withDocsDir bool) string {
 	// Extracts the dir we want operate against by using the value of the
 	// -target flag passed in. If no value was passed in, AND we only have one
 	// entry in the map, use that entry. If no value was passed in and there
-	// are more than one entry in the map, error out
+	// are multiple entries in the map, raise an error because ¯\_(ツ)_/¯
 	tDir := ""
 
 	if len(tDirs) == 1 {
