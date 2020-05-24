@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -48,6 +49,47 @@ func NewPage(title string, targetDir string) *Page {
 	page.Save()
 
 	return page
+}
+
+// AppendTagsToContent programatically modifies the page content to save auto-included
+// content like the tag list
+func (page *Page) AppendTagsToContent() bool {
+	if len(page.Tags()) == 0 {
+		return true
+	}
+
+	tagLinks := []string{}
+	for _, tag := range page.Tags() {
+		if tag.Link() != "" {
+			tagLinks = append(tagLinks, tag.Link())
+		}
+	}
+
+	tagList := strings.Join(tagLinks, ", ")
+
+	// Tags
+	tagsStartStr := "<!-- TAGS:START -->"
+	tagsEndStr := "<!-- TAGS:END -->"
+
+	re := fmt.Sprintf("`%s\n.*\n%s`", tagsStartStr, tagsEndStr)
+	rg := regexp.MustCompile(re)
+
+	newContent := rg.ReplaceAllString(page.Content, tagList)
+
+	if page.Content != newContent {
+		// Swap the old content with the new content
+		page.Content = newContent
+	} else {
+		// Append the tag list to the end of the page
+		page.Content += fmt.Sprintf(
+			"\n%s\n%s\n%s\n",
+			tagsStartStr,
+			tagList,
+			tagsEndStr,
+		)
+	}
+
+	return true
 }
 
 // PageFromFilePath creates and returns a Page instance from a file path

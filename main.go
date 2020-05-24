@@ -112,9 +112,21 @@ func main() {
 
 func buildContent() {
 	pages := loadPages()
+	buildContentPages(pages)
 	tagMap := buildTagPages(pages)
 
 	buildIndexPage(pages, tagMap)
+}
+
+// buildContentPages loops through all the pages and tells them to save themselves
+// to disk. This process writes any auto-generated content into the pages
+func buildContentPages(pages []*pages.Page) {
+	for _, page := range pages {
+		if page.IsContentPage() {
+			page.AppendTagsToContent()
+			page.Save()
+		}
+	}
 }
 
 // buildIndexPage creates the main index.md page that is the root of the site
