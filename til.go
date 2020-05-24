@@ -438,7 +438,7 @@ func buildTagPages(pages []*Page) *TagMap {
 	for _, tagName := range tagMap.SortedTagNames() {
 		wGroup.Add(1)
 
-		go func(tagName string, ll *log.Logger) {
+		go func(tagName string) {
 			defer wGroup.Done()
 
 			content := fmt.Sprintf("## %s\n\n", tagName)
@@ -469,7 +469,7 @@ func buildTagPages(pages []*Page) *TagMap {
 			}
 
 			Progress(filePath)
-		}(tagName, ll)
+		}(tagName)
 	}
 
 	wGroup.Wait()
