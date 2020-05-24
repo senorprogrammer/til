@@ -147,9 +147,6 @@ func main() {
 	// Write the pagePath to the console. This makes it easy to know which file we just created
 	Info(pagePath)
 
-	// And rebuild the index and tag pages
-	buildContent()
-
 	Victory(statusDone)
 }
 
