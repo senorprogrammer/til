@@ -30,7 +30,8 @@ commitMessage: "build, save, push"
 committerEmail: test@example.com
 committerName: "TIL Autobot"
 editor: ""
-targetDirectory: "~/Documents/til"
+targetDirectory: 
+	a: "~/Documents/tilblog"
 `
 	defaultEditor = "open"
 	fileExtension = "md"
