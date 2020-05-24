@@ -394,13 +394,17 @@ func buildIndexPage(pages []*Page, tagMap *TagMap) {
 	content := ""
 
 	// Write the tag list into the top of the index
-	for _, tag := range tagMap.SortedTagNames() {
-		content += fmt.Sprintf(
-			"[%s](%s), ",
-			tag,
-			fmt.Sprintf("./%s", tag),
-		)
+	tagLinks := []string{}
+
+	for _, tagName := range tagMap.SortedTagNames() {
+		tags := tagMap.Get(tagName)
+		if len(tags) > 0 {
+			tagLinks = append(tagLinks, tags[0].Link())
+		}
 	}
+
+	content += strings.Join(tagLinks, ", ")
+	content += "\n"
 
 	// Write the page list into the middle of the page
 	content += pagesToHTMLUnorderedList(pages)
@@ -843,6 +847,19 @@ func (tag *Tag) AddPage(page *Page) {
 // IsValid returns true if this is a valid tag, false if it is not
 func (tag *Tag) IsValid() bool {
 	return tag.Name != ""
+}
+
+// Link returns a link string suitable for embedding in a Markdown page
+func (tag *Tag) Link() string {
+	if tag.Name == "" {
+		return ""
+	}
+
+	return fmt.Sprintf(
+		"[%s](%s)",
+		tag.Name,
+		fmt.Sprintf("./%s", tag.Name),
+	)
 }
 
 /* -------------------- TagMap -------------------- */
