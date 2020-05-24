@@ -9,7 +9,7 @@ import (
 /* -------------------- Configuration -------------------- */
 
 func Test_getConfigPath(t *testing.T) {
-	actual, err := getConfigPath()
+	actual, err := getConfigFilePath()
 
 	assert.Contains(t, actual, "config.yml")
 	assert.NoError(t, err)

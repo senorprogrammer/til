@@ -45,6 +45,7 @@ targetDirectory: "~/Documents/til"
 	errConfigFileAssert   = "could not assert the configuration file exists"
 	errConfigFileCreate   = "could not create the configuration file"
 	errConfigFileWrite    = "could not write the configuration file"
+	errConfigPathEmpty    = "the config path cannot be empty"
 	errConfigValueRead    = "could not read a required configuration value"
 	errNoTitle            = "title must not be blank"
 	errTargetDirCreate    = "could not create the target directories"
@@ -184,14 +185,24 @@ func getConfigDir() (string, error) {
 		return "", errors.New(errConfigExpandPath)
 	}
 
-	return filepath.Join(dir, cDir[1:]), nil
+	cDir = filepath.Join(dir, cDir[1:])
+
+	if cDir == "" {
+		return "", errors.New(errConfigPathEmpty)
+	}
+
+	return cDir, nil
 }
 
-// getConfigPath returns the string path to the configuration file
-func getConfigPath() (string, error) {
+// getConfigFilePath returns the string path to the configuration file
+func getConfigFilePath() (string, error) {
 	cDir, err := getConfigDir()
 	if err != nil {
 		return "", err
+	}
+
+	if cDir == "" {
+		return "", errors.New(errConfigPathEmpty)
 	}
 
 	return fmt.Sprintf("%s/%s", cDir, tilConfigFile), nil
@@ -214,9 +225,13 @@ func makeConfigDir() {
 }
 
 func makeConfigFile() {
-	cPath, err := getConfigPath()
+	cPath, err := getConfigFilePath()
 	if err != nil {
 		Defeat(err)
+	}
+
+	if cPath == "" {
+		Defeat(errors.New(errConfigPathEmpty))
 	}
 
 	_, err = os.Stat(cPath)
@@ -259,9 +274,13 @@ func makeConfigFile() {
 // readConfigFile reads the contents of the config file and jams them
 // into the global config variable
 func readConfigFile() {
-	cPath, err := getConfigPath()
+	cPath, err := getConfigFilePath()
 	if err != nil {
 		Defeat(err)
+	}
+
+	if cPath == "" {
+		Defeat(errors.New(errConfigPathEmpty))
 	}
 
 	cfg, err := config.ParseYamlFile(cPath)
