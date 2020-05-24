@@ -1,10 +1,56 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"os"
 	"testing"
 
+	"github.com/olebedev/config"
 	"github.com/stretchr/testify/assert"
 )
+
+func Test_determineCommitMessage(t *testing.T) {
+	tests := []struct {
+		name       string
+		cfgMessage string
+		args       []string
+		expected   string
+	}{
+		{
+			name:       "passed in via -s",
+			cfgMessage: "from the config",
+			args:       []string{"test", "-t", "b", "-s", "this", "is", "test"},
+			expected:   "this is test",
+		},
+		{
+			name:       "from config file",
+			cfgMessage: "from the config",
+			args:       []string{"test", "-t", "b", "-s"},
+			expected:   "from the config",
+		},
+		{
+			name:       "from default const",
+			cfgMessage: "",
+			args:       []string{"test", "-t", "b", "-s"},
+			expected:   "build, save, push",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			os.Args = tt.args
+			flag.Parse()
+
+			msg := fmt.Sprintf("commitMessage: %s", tt.cfgMessage)
+			cfg, _ := config.ParseYamlBytes([]byte(msg))
+
+			actual := determineCommitMessage(cfg, os.Args)
+
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
+}
 
 /* -------------------- Configuration -------------------- */
 

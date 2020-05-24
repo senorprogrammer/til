@@ -25,6 +25,8 @@ const (
 	tilConfigDir  = "~/.config/til/"
 	tilConfigFile = "config.yml"
 
+	defaultCommitMsg = "build, save, push"
+
 	defaultConfig = `--- 
 commitMessage: "build, save, push"
 committerEmail: test@example.com
@@ -124,7 +126,7 @@ func main() {
 	}
 
 	if saveFlag {
-		commitMsg := strings.Join(os.Args[2:], " ")
+		commitMsg := determineCommitMessage(globalConfig, os.Args)
 
 		buildContent()
 		save(commitMsg)
@@ -528,6 +530,24 @@ func createNewPage(title string) string {
 	return filePath
 }
 
+// determineCommitMessage figures out which commit message to save the repo with
+// The order of precedence is:
+//	* message passed in via the -s flag
+//	* message defined in config.yml for the commitMessage key
+//	* message as a hard-coded constant, at top, in defaultCommitMsg
+// Example:
+//  > til -t b -s this is message
+func determineCommitMessage(cfg *config.Config, args []string) string {
+	if flag.NArg() == 0 {
+		return cfg.UString("commitMessage", defaultCommitMsg)
+	}
+
+	msgOffset := len(args) - flag.NArg()
+	msg := strings.Join(args[msgOffset:], " ")
+
+	return msg
+}
+
 // listTargetDirectories writes the list of target directories in the configuration
 // out to the terminal
 func listTargetDirectories(cfg *config.Config) {
@@ -664,19 +684,18 @@ func save(commitMsg string) {
 		Defeat(err)
 	}
 
-	defaultCommitMsg, err1 := globalConfig.String("commitMessage")
 	defaultCommitEmail, err2 := globalConfig.String("committerEmail")
 	defaultCommitName, err3 := globalConfig.String("committerName")
-	if err1 != nil || err2 != nil || err3 != nil {
+	if err2 != nil || err3 != nil {
 		Defeat(errors.New(errConfigValueRead))
 	}
 
-	if commitMsg == "" {
-		// The incoming commitMsg is optional (if it is set, it probably came in
-		// via command line args on -save). If it isn't set, we use the default
-		// from the config file instead
-		commitMsg = defaultCommitMsg
-	}
+	// if commitMsg == "" {
+	// 	// The incoming commitMsg is optional (if it is set, it probably came in
+	// 	// via command line args on -save). If it isn't set, we use the default
+	// 	// from the config file instead
+	// 	commitMsg = defaultCommitMsg
+	// }
 
 	commit, err := w.Commit(commitMsg, &git.CommitOptions{
 		Author: &object.Signature{
