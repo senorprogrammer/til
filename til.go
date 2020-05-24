@@ -211,6 +211,10 @@ func makeConfigDir() {
 		Defeat(err)
 	}
 
+	if cDir == "" {
+		Defeat(errors.New(errConfigPathEmpty))
+	}
+
 	if _, err := os.Stat(cDir); os.IsNotExist(err) {
 		err := os.MkdirAll(cDir, os.ModePerm)
 		if err != nil {
