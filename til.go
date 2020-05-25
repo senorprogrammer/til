@@ -145,10 +145,7 @@ func main() {
 		Defeat(errors.New(errNoTitle))
 	}
 
-	pagePath := createNewPage(title)
-
-	// Write the pagePath to the console. This makes it easy to know which file we just created
-	Info(pagePath)
+	createNewPage(title)
 
 	Victory(statusDone)
 }
@@ -484,54 +481,21 @@ func buildTagPages(pages []*Page) *TagMap {
 	return tagMap
 }
 
-func createNewPage(title string) string {
-	date := time.Now()
-	pathDate := date.Format(ghFriendlyDateFormat)
-
-	// Front matter lives at the top of the generated file and contains bits of info about the page
-	// This is loosely based on the format Hugo uses
-	frontMatter := fmt.Sprintf(
-		"---\ndate: %s\ntitle: %s\ntags: %s\n---\n\n",
-		date.Format(time.RFC3339),
-		title,
-		"",
-	)
-
-	content := frontMatter + fmt.Sprintf("# %s\n\n\n", title)
-
-	// Write out the stub file, explode if we can't do that
+func createNewPage(title string) {
 	tDir, err := getTargetDir(globalConfig, true)
 	if err != nil {
 		Defeat(err)
 	}
 
-	filePath := fmt.Sprintf(
-		"%s/%s-%s.%s",
-		tDir,
-		pathDate,
-		strings.ReplaceAll(strings.ToLower(title), " ", "-"),
-		fileExtension,
-	)
+	page := NewPage(title, tDir)
 
-	err = ioutil.WriteFile(filePath, []byte(content), 0644)
+	err = open(page)
 	if err != nil {
 		Defeat(err)
 	}
 
-	// Tell the OS to open the newly-created page in the editor (as specified in the config)
-	// If there's no editor explicitly defined by the user, tell the OS to try and open it
-	editor := globalConfig.UString("editor", defaultEditor)
-	if editor == "" {
-		editor = defaultEditor
-	}
-
-	cmd := exec.Command(editor, filePath)
-	err = cmd.Run()
-	if err != nil {
-		Defeat(err)
-	}
-
-	return filePath
+	// Write the page path to the console. This makes it easy to know which file we just created
+	Info(page.FilePath)
 }
 
 // determineCommitMessage figures out which commit message to save the repo with
@@ -589,6 +553,20 @@ func loadPages() []*Page {
 	}
 
 	return pages
+}
+
+// open tll the OS to open the newly-created page in the editor (as specified in the config)
+// If there's no editor explicitly defined by the user, tell the OS to try and open it
+func open(page *Page) error {
+	editor := globalConfig.UString("editor", defaultEditor)
+	if editor == "" {
+		editor = defaultEditor
+	}
+
+	cmd := exec.Command(editor, page.FilePath)
+	err := cmd.Run()
+
+	return err
 }
 
 // pagesToHTMLUnorderedList creates the unordered list of page links that appear
@@ -770,6 +748,27 @@ type Page struct {
 	Title    string `yaml:"title"`
 }
 
+// NewPage creates and returns an instance of page
+func NewPage(title string, targetDir string) *Page {
+	date := time.Now()
+
+	page := &Page{
+		Date: date.Format(time.RFC3339),
+		FilePath: fmt.Sprintf(
+			"%s/%s-%s.%s",
+			targetDir,
+			date.Format(ghFriendlyDateFormat),
+			strings.ReplaceAll(strings.ToLower(title), " ", "-"),
+			fileExtension,
+		),
+		Title: title,
+	}
+
+	page.Save()
+
+	return page
+}
+
 // CreatedAt returns a time instance representing when the page was created
 func (page *Page) CreatedAt() time.Time {
 	date, err := time.Parse(time.RFC3339, page.Date)
@@ -787,6 +786,16 @@ func (page *Page) CreatedMonth() time.Month {
 	}
 
 	return page.CreatedAt().Month()
+}
+
+// FrontMatter returns the front-matter of the page
+func (page *Page) FrontMatter() string {
+	return fmt.Sprintf(
+		"---\ndate: %s\ntitle: %s\ntags: %s\n---\n\n",
+		page.Date,
+		page.Title,
+		page.TagsStr,
+	)
 }
 
 // IsContentPage returns true if the page is a valid entry page, false if it is not
@@ -807,6 +816,17 @@ func (page *Page) Link() string {
 // PrettyDate returns a human-friendly representation of the CreatedAt date
 func (page *Page) PrettyDate() string {
 	return page.CreatedAt().Format("Jan 02, 2006")
+}
+
+// Save writes the content of the page to file
+func (page *Page) Save() {
+	pageSrc := page.FrontMatter()
+	pageSrc += fmt.Sprintf("# %s\n\n", page.Title)
+
+	err := ioutil.WriteFile(page.FilePath, []byte(pageSrc), 0644)
+	if err != nil {
+		Defeat(err)
+	}
 }
 
 // Tags returns a slice of tags assigned to this page
