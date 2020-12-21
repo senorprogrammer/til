@@ -1,6 +1,8 @@
-package src
+package pages
 
-import "sort"
+import (
+	"sort"
+)
 
 // TagMap is a map of tag name to Tag instance
 type TagMap struct {
@@ -8,12 +10,12 @@ type TagMap struct {
 }
 
 // NewTagMap creates and returns an instance of TagMap
-func NewTagMap(pages []*Page) *TagMap {
+func NewTagMap(pageSet []*Page) *TagMap {
 	tm := &TagMap{
 		Tags: make(map[string][]*Tag),
 	}
 
-	tm.BuildFromPages(pages)
+	tm.BuildFromPages(pageSet)
 
 	return tm
 }

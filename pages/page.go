@@ -1,11 +1,15 @@
-package src
+package pages
 
 import (
 	"fmt"
 	"io/ioutil"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/ericaro/frontmatter"
+	"github.com/senorprogrammer/til/src"
 )
 
 const (
@@ -42,6 +46,25 @@ func NewPage(title string, targetDir string) *Page {
 	}
 
 	page.Save()
+
+	return page
+}
+
+// PageFromFilePath creates and returns a Page instance from a file path
+func PageFromFilePath(filePath string) *Page {
+	page := new(Page)
+
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		src.Defeat(err)
+	}
+
+	err = frontmatter.Unmarshal(data, page)
+	if err != nil {
+		src.Defeat(err)
+	}
+
+	page.FilePath = filePath
 
 	return page
 }
@@ -90,6 +113,20 @@ func (page *Page) Link() string {
 	)
 }
 
+// Open tll the OS to open the newly-created page in the editor (as specified in the config)
+// If there's no editor explicitly defined by the user, tell the OS to try and open it
+func (page *Page) Open(defaultEditor string) error {
+	editor := src.GlobalConfig.UString("editor", defaultEditor)
+	if editor == "" {
+		editor = defaultEditor
+	}
+
+	cmd := exec.Command(editor, page.FilePath)
+	err := cmd.Run()
+
+	return err
+}
+
 // PrettyDate returns a human-friendly representation of the CreatedAt date
 func (page *Page) PrettyDate() string {
 	return page.CreatedAt().Format("Jan 02, 2006")
@@ -102,7 +139,7 @@ func (page *Page) Save() {
 
 	err := ioutil.WriteFile(page.FilePath, []byte(pageSrc), 0644)
 	if err != nil {
-		Defeat(err)
+		src.Defeat(err)
 	}
 }
 

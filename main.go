@@ -7,16 +7,15 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/ericaro/frontmatter"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/olebedev/config"
+	"github.com/senorprogrammer/til/pages"
 	"github.com/senorprogrammer/til/src"
 )
 
@@ -59,6 +58,8 @@ func init() {
 	flag.StringVar(&targetDirFlag, "t", "", "specifies the target directory key (short-hand)")
 	flag.StringVar(&targetDirFlag, "target", "", "specifies the target directory key")
 }
+
+/* -------------------- Main -------------------- */
 
 func main() {
 	flag.Parse()
@@ -112,11 +113,12 @@ func main() {
 func buildContent() {
 	pages := loadPages()
 	tagMap := buildTagPages(pages)
+
 	buildIndexPage(pages, tagMap)
 }
 
 // buildIndexPage creates the main index.md page that is the root of the site
-func buildIndexPage(pages []*src.Page, tagMap *src.TagMap) {
+func buildIndexPage(pageSet []*pages.Page, tagMap *pages.TagMap) {
 	src.Info(statusIdxBuild)
 
 	content := ""
@@ -135,7 +137,7 @@ func buildIndexPage(pages []*src.Page, tagMap *src.TagMap) {
 	content += "\n"
 
 	// Write the page list into the middle of the page
-	content += pagesToHTMLUnorderedList(pages)
+	content += pagesToHTMLUnorderedList(pageSet)
 	content += "\n"
 
 	// Write the footer content into the bottom of the index
@@ -151,7 +153,7 @@ func buildIndexPage(pages []*src.Page, tagMap *src.TagMap) {
 	filePath := fmt.Sprintf(
 		"%s/index.%s",
 		tDir,
-		src.FileExtension,
+		pages.FileExtension,
 	)
 
 	err = ioutil.WriteFile(filePath, []byte(content), 0644)
@@ -163,10 +165,10 @@ func buildIndexPage(pages []*src.Page, tagMap *src.TagMap) {
 }
 
 // buildTagPages creates the tag pages, with links to posts tagged with those names
-func buildTagPages(pages []*src.Page) *src.TagMap {
+func buildTagPages(pageSet []*pages.Page) *pages.TagMap {
 	src.Info(statusTagBuild)
 
-	tagMap := src.NewTagMap(pages)
+	tagMap := pages.NewTagMap(pageSet)
 
 	var wGroup sync.WaitGroup
 
@@ -195,7 +197,7 @@ func buildTagPages(pages []*src.Page) *src.TagMap {
 				"%s/%s.%s",
 				tDir,
 				tagName,
-				src.FileExtension,
+				pages.FileExtension,
 			)
 
 			err = ioutil.WriteFile(filePath, []byte(content), 0644)
@@ -218,9 +220,9 @@ func createNewPage(title string) {
 		src.Defeat(err)
 	}
 
-	page := src.NewPage(title, tDir)
+	page := pages.NewPage(title, tDir)
 
-	err = open(page)
+	err = page.Open(defaultEditor)
 	if err != nil {
 		src.Defeat(err)
 	}
@@ -262,8 +264,8 @@ func listTargetDirectories(cfg *config.Config) {
 
 // loadPages reads the page files from disk (in reverse chronological order) and
 // creates Page instances from them
-func loadPages() []*src.Page {
-	pages := []*src.Page{}
+func loadPages() []*pages.Page {
+	pageSet := []*pages.Page{}
 
 	tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
 	if err != nil {
@@ -274,39 +276,39 @@ func loadPages() []*src.Page {
 		fmt.Sprintf(
 			"%s/*.%s",
 			tDir,
-			src.FileExtension,
+			pages.FileExtension,
 		),
 	)
 
 	for i := len(filePaths) - 1; i >= 0; i-- {
-		page := readPage(filePaths[i])
-		pages = append(pages, page)
+		page := pages.PageFromFilePath(filePaths[i])
+		pageSet = append(pageSet, page)
 	}
 
-	return pages
+	return pageSet
 }
 
-// open tll the OS to open the newly-created page in the editor (as specified in the config)
-// If there's no editor explicitly defined by the user, tell the OS to try and open it
-func open(page *src.Page) error {
-	editor := src.GlobalConfig.UString("editor", defaultEditor)
-	if editor == "" {
-		editor = defaultEditor
-	}
+// // open tll the OS to open the newly-created page in the editor (as specified in the config)
+// // If there's no editor explicitly defined by the user, tell the OS to try and open it
+// func open(page *src.Page) error {
+// 	editor := src.GlobalConfig.UString("editor", defaultEditor)
+// 	if editor == "" {
+// 		editor = defaultEditor
+// 	}
 
-	cmd := exec.Command(editor, page.FilePath)
-	err := cmd.Run()
+// 	cmd := exec.Command(editor, page.FilePath)
+// 	err := cmd.Run()
 
-	return err
-}
+// 	return err
+// }
 
 // pagesToHTMLUnorderedList creates the unordered list of page links that appear
 // on the index and tag pages
-func pagesToHTMLUnorderedList(pages []*src.Page) string {
+func pagesToHTMLUnorderedList(pageSet []*pages.Page) string {
 	content := ""
-	prevPage := &src.Page{}
+	prevPage := &pages.Page{}
 
-	for _, page := range pages {
+	for _, page := range pageSet {
 		if !page.IsContentPage() {
 			continue
 		}
@@ -351,26 +353,6 @@ func push() {
 	if err != nil {
 		src.Defeat(err)
 	}
-}
-
-// readPage reads the contents of the page and unmarshals it into the Page struct,
-// making the page's internal frontmatter programmatically accessible
-func readPage(filePath string) *src.Page {
-	page := new(src.Page)
-
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		src.Defeat(err)
-	}
-
-	err = frontmatter.Unmarshal(data, page)
-	if err != nil {
-		src.Defeat(err)
-	}
-
-	page.FilePath = filePath
-
-	return page
 }
 
 // https://github.com/go-git/go-git/blob/master/_examples/commit/main.go
