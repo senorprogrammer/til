@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/olebedev/config"
+	"github.com/senorprogrammer/til/src"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -55,7 +56,7 @@ func Test_determineCommitMessage(t *testing.T) {
 /* -------------------- Configuration -------------------- */
 
 func Test_getConfigPath(t *testing.T) {
-	actual, err := getConfigFilePath()
+	actual, err := src.GetConfigFilePath()
 
 	assert.Contains(t, actual, "config.yml")
 	assert.NoError(t, err)
@@ -64,7 +65,7 @@ func Test_getConfigPath(t *testing.T) {
 /* -------------------- More Helper Functions -------------------- */
 
 func Test_Colour(t *testing.T) {
-	x := Colour("yo%soy")
+	x := src.Colour("yo%soy")
 	actual := x("cat")
 
 	assert.Equal(t, "yocatoy", actual)
@@ -73,7 +74,7 @@ func Test_Colour(t *testing.T) {
 /* -------------------- Page -------------------- */
 
 func Test_Page_CreatedAt(t *testing.T) {
-	page := &Page{Date: "2020-05-07T13:13:08-07:00"}
+	page := &src.Page{Date: "2020-05-07T13:13:08-07:00"}
 
 	actual := page.CreatedAt()
 
@@ -83,7 +84,7 @@ func Test_Page_CreatedAt(t *testing.T) {
 }
 
 func Test_Page_CreatedMonth(t *testing.T) {
-	page := &Page{Date: "2020-05-07T13:13:08-07:00"}
+	page := &src.Page{Date: "2020-05-07T13:13:08-07:00"}
 
 	actual := page.CreatedMonth()
 
@@ -110,7 +111,7 @@ func Test_IsContentPage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			page := &Page{Title: tt.title}
+			page := &src.Page{Title: tt.title}
 
 			actual := page.IsContentPage()
 
@@ -120,7 +121,7 @@ func Test_IsContentPage(t *testing.T) {
 }
 
 func Test_Page_Link(t *testing.T) {
-	page := &Page{
+	page := &src.Page{
 		Date:     "2020-05-07T13:13:08-07:00",
 		FilePath: "docs/zombies.md",
 		Title:    "Zombies",
@@ -132,7 +133,7 @@ func Test_Page_Link(t *testing.T) {
 }
 
 func Test_Page_PrettDate(t *testing.T) {
-	page := &Page{Date: "2020-05-07T13:13:08-07:00"}
+	page := &src.Page{Date: "2020-05-07T13:13:08-07:00"}
 
 	actual := page.PrettyDate()
 
@@ -142,16 +143,16 @@ func Test_Page_PrettDate(t *testing.T) {
 /* -------------------- Tag -------------------- */
 
 func Test_Tag_NewTag(t *testing.T) {
-	actual := NewTag("ada", &Page{Title: "test"})
+	actual := src.NewTag("ada", &src.Page{Title: "test"})
 
-	assert.IsType(t, &Tag{}, actual)
+	assert.IsType(t, &src.Tag{}, actual)
 	assert.Equal(t, "ada", actual.Name)
 	assert.Equal(t, "test", actual.Pages[0].Title)
 }
 
 func Test_Tag_AddPage(t *testing.T) {
-	tag := NewTag("ada", &Page{Title: "test"})
-	tag.AddPage(&Page{Title: "zombies"})
+	tag := src.NewTag("ada", &src.Page{Title: "test"})
+	tag.AddPage(&src.Page{Title: "zombies"})
 
 	assert.Equal(t, 2, len(tag.Pages))
 	assert.Equal(t, "zombies", tag.Pages[1].Title)
@@ -177,7 +178,7 @@ func Test_Tag_IsValid(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tag := NewTag(tt.title, &Page{})
+			tag := src.NewTag(tt.title, &src.Page{})
 
 			actual := tag.IsValid()
 
@@ -191,17 +192,17 @@ func Test_Tag_IsValid(t *testing.T) {
 func Test_NewTagMap(t *testing.T) {
 	tests := []struct {
 		name        string
-		pages       []*Page
+		pages       []*src.Page
 		expectedLen int
 	}{
 		{
 			name:        "with no pages",
-			pages:       []*Page{},
+			pages:       []*src.Page{},
 			expectedLen: 0,
 		},
 		{
 			name: "with pages",
-			pages: []*Page{
+			pages: []*src.Page{
 				{TagsStr: "go, ada"},
 			},
 			expectedLen: 2,
@@ -210,7 +211,7 @@ func Test_NewTagMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual := NewTagMap(tt.pages).Tags
+			actual := src.NewTagMap(tt.pages).Tags
 
 			assert.Equal(t, tt.expectedLen, len(actual))
 		})
@@ -220,24 +221,24 @@ func Test_NewTagMap(t *testing.T) {
 func Test_TagMap_Add(t *testing.T) {
 	tests := []struct {
 		name        string
-		tag         *Tag
+		tag         *src.Tag
 		expectedLen int
 	}{
 		{
 			name:        "with an invalid tag",
-			tag:         &Tag{},
+			tag:         &src.Tag{},
 			expectedLen: 0,
 		},
 		{
 			name:        "with a new tag",
-			tag:         &Tag{Name: "go"},
+			tag:         &src.Tag{Name: "go"},
 			expectedLen: 1,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tMap := NewTagMap([]*Page{})
+			tMap := src.NewTagMap([]*src.Page{})
 			tMap.Add(tt.tag)
 
 			actual := tMap.Tags
@@ -250,17 +251,17 @@ func Test_TagMap_Add(t *testing.T) {
 func Test_TagMap_BuildFromPages(t *testing.T) {
 	tests := []struct {
 		name        string
-		pages       []*Page
+		pages       []*src.Page
 		expectedLen int
 	}{
 		{
 			name:        "with no pages",
-			pages:       []*Page{},
+			pages:       []*src.Page{},
 			expectedLen: 0,
 		},
 		{
 			name: "with pages",
-			pages: []*Page{
+			pages: []*src.Page{
 				{TagsStr: "go"},
 				{TagsStr: "ada"},
 			},
@@ -270,7 +271,7 @@ func Test_TagMap_BuildFromPages(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tMap := NewTagMap([]*Page{})
+			tMap := src.NewTagMap([]*src.Page{})
 			tMap.BuildFromPages(tt.pages)
 
 			actual := tMap.Tags
@@ -299,8 +300,8 @@ func Test_TagMap_Get(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		pages := []*Page{{TagsStr: "go"}}
-		tMap := NewTagMap(pages)
+		pages := []*src.Page{{TagsStr: "go"}}
+		tMap := src.NewTagMap(pages)
 
 		actual := tMap.Get(tt.input)
 
@@ -313,24 +314,24 @@ func Test_TagMap_Get(t *testing.T) {
 func Test_TagMap_Len(t *testing.T) {
 	tests := []struct {
 		name        string
-		page        *Page
+		page        *src.Page
 		expectedLen int
 	}{
 		{
 			name:        "with missing tag",
-			page:        &Page{},
+			page:        &src.Page{},
 			expectedLen: 0,
 		},
 		{
 			name:        "with valid tag",
-			page:        &Page{TagsStr: "go"},
+			page:        &src.Page{TagsStr: "go"},
 			expectedLen: 1,
 		},
 	}
 
 	for _, tt := range tests {
-		pages := []*Page{tt.page}
-		tMap := NewTagMap(pages)
+		pages := []*src.Page{tt.page}
+		tMap := src.NewTagMap(pages)
 
 		actual := tMap.Len()
 
@@ -341,8 +342,8 @@ func Test_TagMap_Len(t *testing.T) {
 }
 
 func Test_TagMap_SortedTagNames(t *testing.T) {
-	pages := []*Page{{TagsStr: "go, ada, lua"}}
-	tMap := NewTagMap(pages)
+	pages := []*src.Page{{TagsStr: "go, ada, lua"}}
+	tMap := src.NewTagMap(pages)
 
 	expected := []string{"ada", "go", "lua"}
 	actual := tMap.SortedTagNames()
