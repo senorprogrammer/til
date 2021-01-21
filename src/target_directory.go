@@ -2,6 +2,7 @@ package src
 
 import (
 	"errors"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -20,7 +21,8 @@ const (
 func BuildTargetDirectory() {
 	tDir, err := GetTargetDir(GlobalConfig, "", true)
 	if err != nil {
-		Defeat(err)
+		log.Printf("BuildTargetDirectory got error: %v", err)
+		return
 	}
 
 	if _, err := os.Stat(tDir); os.IsNotExist(err) {
