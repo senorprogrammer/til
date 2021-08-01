@@ -74,7 +74,7 @@ func main() {
 	   "stickhandling", so here we are, abomination enshrined */
 
 	if listFlag {
-		listTargetDirectories(src.GlobalConfig)
+		src.ListTargetDirectories(src.GlobalConfig)
 		src.Victory(statusDone)
 	}
 
@@ -267,20 +267,6 @@ func determineCommitMessage(cfg *config.Config, args []string) string {
 	return msg
 }
 
-// listTargetDirectories writes the list of target directories in the configuration
-// out to the terminal
-func listTargetDirectories(cfg *config.Config) {
-	dirMap, err := cfg.Map("targetDirectories")
-	if err != nil {
-		src.Info("Failed to map target directories")
-		src.Defeat(err)
-	}
-
-	for key, dir := range dirMap {
-		src.Info(fmt.Sprintf("%6s\t%s\n", key, dir.(string)))
-	}
-}
-
 // loadPages reads the page files from disk (in reverse chronological order) and
 // creates Page instances from them
 func loadPages() []*pages.Page {
@@ -307,20 +293,6 @@ func loadPages() []*pages.Page {
 
 	return pageSet
 }
-
-// // open tll the OS to open the newly-created page in the editor (as specified in the config)
-// // If there's no editor explicitly defined by the user, tell the OS to try and open it
-// func open(page *src.Page) error {
-// 	editor := src.GlobalConfig.UString("editor", defaultEditor)
-// 	if editor == "" {
-// 		editor = defaultEditor
-// 	}
-
-// 	cmd := exec.Command(editor, page.FilePath)
-// 	err := cmd.Run()
-
-// 	return err
-// }
 
 // pagesToHTMLUnorderedList creates the unordered list of page links that appear
 // on the index and tag pages
