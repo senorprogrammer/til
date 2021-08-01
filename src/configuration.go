@@ -100,6 +100,7 @@ func GetConfigFilePath() (string, error) {
 func makeConfigDir() {
 	cDir, err := getConfigDir()
 	if err != nil {
+		Info("Failed to make config dir")
 		Defeat(err)
 	}
 
@@ -120,6 +121,7 @@ func makeConfigDir() {
 func makeConfigFile() {
 	cPath, err := GetConfigFilePath()
 	if err != nil {
+		Info("Failed to get config file path")
 		Defeat(err)
 	}
 
@@ -143,6 +145,7 @@ func makeConfigFile() {
 		} else {
 			// But wait, it's some kind of other error. What kind?
 			// I dunno, but it's probably bad so die
+			Info("Something weird happened")
 			Defeat(err)
 		}
 	}
@@ -169,6 +172,7 @@ func makeConfigFile() {
 func readConfigFile() *config.Config {
 	cPath, err := GetConfigFilePath()
 	if err != nil {
+		Info("Failed to read config file path")
 		Defeat(err)
 	}
 
@@ -178,6 +182,7 @@ func readConfigFile() *config.Config {
 
 	cfg, err := config.ParseYamlFile(cPath)
 	if err != nil {
+		Info("Failed to parse config yaml file")
 		Defeat(err)
 	}
 

@@ -159,6 +159,7 @@ func buildIndexPage(pageSet []*pages.Page, tagMap *pages.TagMap) {
 	// And write the file to disk
 	tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
 	if err != nil {
+		src.Info("Failed to get target dir (1)")
 		src.Defeat(err)
 	}
 
@@ -170,6 +171,7 @@ func buildIndexPage(pageSet []*pages.Page, tagMap *pages.TagMap) {
 
 	err = ioutil.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
+		src.Info("Failed to write file (1)")
 		src.Defeat(err)
 	}
 
@@ -202,6 +204,7 @@ func buildTagPages(pageSet []*pages.Page) *pages.TagMap {
 			// And write the file to disk
 			tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
 			if err != nil {
+				src.Info("Failed to get target dir (2)")
 				src.Defeat(err)
 			}
 
@@ -214,6 +217,7 @@ func buildTagPages(pageSet []*pages.Page) *pages.TagMap {
 
 			err = ioutil.WriteFile(filePath, []byte(content), 0644)
 			if err != nil {
+				src.Info("Failed to write file (2)")
 				src.Defeat(err)
 			}
 
@@ -229,6 +233,7 @@ func buildTagPages(pageSet []*pages.Page) *pages.TagMap {
 func createNewPage(title string) {
 	tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
 	if err != nil {
+		src.Info("Failed to get target dir (3)")
 		src.Defeat(err)
 	}
 
@@ -236,6 +241,7 @@ func createNewPage(title string) {
 
 	err = page.Open(defaultEditor)
 	if err != nil {
+		src.Info("Failed to open editor")
 		src.Defeat(err)
 	}
 
@@ -266,6 +272,7 @@ func determineCommitMessage(cfg *config.Config, args []string) string {
 func listTargetDirectories(cfg *config.Config) {
 	dirMap, err := cfg.Map("targetDirectories")
 	if err != nil {
+		src.Info("Failed to map target directories")
 		src.Defeat(err)
 	}
 
@@ -281,6 +288,7 @@ func loadPages() []*pages.Page {
 
 	tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
 	if err != nil {
+		src.Info("Failed to get target dir (4)")
 		src.Defeat(err)
 	}
 
@@ -353,16 +361,19 @@ func push() {
 
 	tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, false)
 	if err != nil {
+		src.Info("Failed to get target dir (5)")
 		src.Defeat(err)
 	}
 
 	r, err := git.PlainOpen(tDir)
 	if err != nil {
+		src.Info("Failed to plain open")
 		src.Defeat(err)
 	}
 
 	err = r.Push(&git.PushOptions{})
 	if err != nil {
+		src.Info("Failed to git push")
 		src.Defeat(err)
 	}
 }

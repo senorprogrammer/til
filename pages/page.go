@@ -53,9 +53,9 @@ func NewPage(title string, targetDir string) *Page {
 
 // AppendTagsToContent programatically modifies the page content to save auto-included
 // content like the tag list
-func (page *Page) AppendTagsToContent() bool {
+func (page *Page) AppendTagsToContent() {
 	if len(page.Tags()) == 0 {
-		return true
+		return
 	}
 
 	tagLinks := []string{}
@@ -77,19 +77,18 @@ func (page *Page) AppendTagsToContent() bool {
 	newContent := rg.ReplaceAllString(page.Content, tagList)
 
 	if page.Content != newContent {
-		// Swap the old content with the new content
+		// Swap the old content with the new content and we're done
 		page.Content = newContent
-	} else {
-		// Append the tag list to the end of the page
-		page.Content += fmt.Sprintf(
-			"\n%s\n%s\n%s\n",
-			tagsStartStr,
-			tagList,
-			tagsEndStr,
-		)
+		return
 	}
 
-	return true
+	// Else append the tag list to the end of the page
+	page.Content += fmt.Sprintf(
+		"\n%s\n%s\n%s\n",
+		tagsStartStr,
+		tagList,
+		tagsEndStr,
+	)
 }
 
 // PageFromFilePath creates and returns a Page instance from a file path
@@ -98,11 +97,13 @@ func PageFromFilePath(filePath string) *Page {
 
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
+		src.Info("Failed to read file")
 		src.Defeat(err)
 	}
 
 	err = frontmatter.Unmarshal(data, page)
 	if err != nil {
+		src.Info(fmt.Sprintf("Failed to unmarshal: %s", filePath))
 		src.Defeat(err)
 	}
 
@@ -181,6 +182,7 @@ func (page *Page) Save() {
 
 	err := ioutil.WriteFile(page.FilePath, []byte(pageSrc), 0644)
 	if err != nil {
+		src.Info("Failed to write file")
 		src.Defeat(err)
 	}
 }
