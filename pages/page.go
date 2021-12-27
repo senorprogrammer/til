@@ -91,7 +91,7 @@ func (page *Page) CreatedMonth() time.Month {
 // FrontMatter returns the front-matter of the page
 func (page *Page) FrontMatter() string {
 	return fmt.Sprintf(
-		"---\ndate: %s\ntitle: %s\ntags: %s\n---\n\n",
+		"---\nlayout: default\ndate: %s\ntitle: %s\ntags: %s\n---\n\n",
 		page.Date,
 		page.Title,
 		page.TagsStr,
