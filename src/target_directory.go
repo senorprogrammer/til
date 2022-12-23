@@ -2,6 +2,7 @@ package src
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -96,4 +97,18 @@ func GetTargetDir(cfg *config.Config, targetDirFlag string, withDocsDir bool) (s
 	}
 
 	return filepath.Join(dir, tDir[1:], docsBit), nil
+}
+
+// ListTargetDirectories writes the list of target directories in the configuration
+// out to the terminal
+func ListTargetDirectories(cfg *config.Config) {
+	dirMap, err := cfg.Map("targetDirectories")
+	if err != nil {
+		Info("Failed to map target directories")
+		Defeat(err)
+	}
+
+	for key, dir := range dirMap {
+		Info(fmt.Sprintf("%6s\t%s\n", key, dir.(string)))
+	}
 }
