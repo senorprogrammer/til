@@ -1,0 +1,154 @@
+# Go Development Best Practices for TIL Project
+
+## Code Style & Formatting
+
+- Always run `gofmt` and `goimports` before committing code
+- Follow standard Go formatting conventions (1TBS style braces, etc.)
+- Use `golangci-lint` or similar tools to catch style issues
+- Prefer explicit error handling over panics
+- Use meaningful variable and function names that are clear in context
+
+## Error Handling
+
+- Always handle errors explicitly - never ignore them with `_`
+- Use `fmt.Errorf` with `%w` verb for error wrapping to preserve error chains
+- Return errors as the last return value from functions
+- Use sentinel errors (errors.New) for expected error conditions
+- Document error conditions in function comments
+- Prefer returning errors over calling fatal/panic functions in library code
+
+Example:
+```go
+if err != nil {
+    return fmt.Errorf("failed to read config: %w", err)
+}
+```
+
+## Testing
+
+- Write tests for all exported functions and critical logic
+- Use table-driven tests for multiple test cases
+- Use `t.Helper()` in test helper functions
+- Place tests in `*_test.go` files in the same package
+- Use descriptive test names: `TestFunctionName_Scenario_ExpectedResult`
+- Test both success and error cases
+- Use `testify` assertions when appropriate, but prefer standard library when simple
+
+Example:
+```go
+func TestNewPage(t *testing.T) {
+    t.Helper()
+    tests := []struct {
+        name  string
+        title string
+        want  string
+    }{
+        {"valid title", "Test Title", "test-title"},
+    }
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            // test implementation
+        })
+    }
+}
+```
+
+## Documentation
+
+- Document all exported functions, types, and packages
+- Start comments with the name of the thing being documented
+- Use complete sentences in documentation
+- Include examples for complex functions using `// Example` comments
+- Document package purpose in package comment
+
+Example:
+```go
+// NewPage creates and returns a new Page instance with the given title.
+// The page will be saved to the specified target directory.
+func NewPage(title string, targetDir string) *Page {
+```
+
+## Package Organization
+
+- Keep packages focused and cohesive
+- Prefer small, focused packages over large monolithic ones
+- Use `internal/` for packages that should not be imported by other projects
+- Group related functionality together
+- Avoid circular dependencies
+
+## Code Organization
+
+- Order imports: standard library, third-party, local packages (separated by blank line)
+- Use constructors (New* functions) for struct initialization when validation is needed
+- Prefer `any` over `interface{}` for empty interfaces
+- Use constants for magic numbers and repeated strings
+- Group related constants together
+- Use meaningful constant names, not abbreviations
+- **Function ordering**: Exported functions must always come before private functions in a file
+- **Exported function ordering**: Exported functions must be written in alphabetical order (functions starting with 'A' before 'B', etc.)
+- **Private function ordering**: Private functions must be written in alphabetical order (functions starting with 'a' before 'b', etc.)
+
+## Performance
+
+- Prefer `strings.Builder` for string concatenation in loops
+- Use `make()` with capacity when slice size is known
+- Avoid premature optimization - profile first
+- Use `sync.Pool` for frequently allocated objects if profiling shows benefit
+- Prefer value receivers unless method needs to modify receiver or receiver is large
+
+## Concurrency
+
+- Use `context.Context` for cancellation and timeouts
+- Prefer channels for communication between goroutines
+- Use `sync` package primitives (Mutex, WaitGroup, etc.) when appropriate
+- Document goroutine lifecycle and ownership
+- Avoid goroutine leaks - ensure all goroutines can exit
+
+## Dependencies
+
+- Minimize external dependencies
+- Prefer standard library solutions when available
+- Keep dependencies up to date and secure
+- Use `go mod tidy` to clean up unused dependencies
+- Document why external dependencies are needed
+
+## CLI-Specific Guidelines
+
+- Use `flag` package for command-line flags (or `cobra`/`urfave/cli` for complex CLIs)
+- Provide clear, helpful error messages to users
+- Use exit codes appropriately (0 for success, non-zero for errors)
+- Support `-h`/`--help` flags
+- Consider adding `-version` flag for version information
+
+## Security
+
+- Validate and sanitize user input
+- Use `filepath` package for file path operations (not `strings`)
+- Be careful with file permissions (avoid world-writable files)
+- Don't log sensitive information
+- Use secure defaults
+
+## Project-Specific Patterns
+
+- Use constructors (New* functions) for creating instances
+- Error constants should be defined near where they're used
+- Status messages should be constants when reused
+- Prefer explicit configuration over magic values
+- Use the existing logging patterns (`src.Info`, `src.Progress`, etc.) for consistency
+
+## Git & Version Control
+
+- **Commit messages**: All commit messages must start with the robot-head emoji (🤖) before any other emoji or commit message text
+- Write clear, descriptive commit messages
+- Use present tense ("Add feature" not "Added feature")
+
+## Code Review Checklist
+
+- [ ] Code follows Go formatting standards
+- [ ] All errors are handled explicitly
+- [ ] Tests are included for new functionality
+- [ ] Documentation is updated for exported symbols
+- [ ] No unnecessary dependencies added
+- [ ] Code is readable and maintainable
+- [ ] Performance implications considered (if applicable)
+- [ ] Functions are ordered correctly (exported before private, alphabetical within each group)
