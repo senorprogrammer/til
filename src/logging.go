@@ -16,21 +16,21 @@ func Defeat(err error) {
 		log.Fatalf("%s %s", Red("✘"), err.Error())
 		return
 	}
-	LL.Fatal(fmt.Sprintf("%s %s", Red("✘"), err.Error()))
+	LL.Fatalf("%s %s", Red("✘"), err.Error())
 }
 
 // Info writes out an informative message
 func Info(msg string) {
-	LL.Print(fmt.Sprintf("%s %s", Green("->"), msg))
+	LL.Printf("%s %s", Green("->"), msg)
 }
 
 // Progress writes out a progress status message
 func Progress(msg string) {
-	LL.Print(fmt.Sprintf("\t%s %s\n", Blue("->"), msg))
+	LL.Printf("\t%s %s\n", Blue("->"), msg)
 }
 
 // Victory writes out a victorious final message and then expires dramatically
 func Victory(msg string) {
-	LL.Print(fmt.Sprintf("%s %s", Green("✓"), msg))
+	LL.Printf("%s %s", Green("✓"), msg)
 	os.Exit(0)
 }
