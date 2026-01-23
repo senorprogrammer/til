@@ -22,6 +22,10 @@ func (w *OSFileWriter) WriteFile(path string, content []byte, perm os.FileMode) 
 	return os.WriteFile(path, content, perm)
 }
 
+// DefaultFileWriter is a shared instance of OSFileWriter that can be reused
+// since it's stateless. This reduces allocations and makes mocking easier.
+var DefaultFileWriter FileWriter = &OSFileWriter{}
+
 // Logger defines the interface for logging
 type Logger interface {
 	Info(msg string)

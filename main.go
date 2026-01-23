@@ -91,8 +91,7 @@ func main() {
 		}
 
 		loader := loader.NewPageLoader(docsDir, pages.FileExtension)
-		writer := &builder.OSFileWriter{}
-		builder := builder.NewSiteBuilder(docsDir, writer, logger)
+		builder := builder.NewSiteBuilder(docsDir, builder.DefaultFileWriter, logger)
 		resolver := commands.NewCommitMessageResolver(src.GlobalConfig, defaultCommitMsg)
 
 		cmd := commands.NewSaveCommand(builder, loader, repo, resolver, os.Args, logger)
@@ -109,8 +108,7 @@ func main() {
 		}
 
 		loader := loader.NewPageLoader(tDir, pages.FileExtension)
-		writer := &builder.OSFileWriter{}
-		builder := builder.NewSiteBuilder(tDir, writer, logger)
+		builder := builder.NewSiteBuilder(tDir, builder.DefaultFileWriter, logger)
 
 		cmd := commands.NewBuildCommand(builder, loader, logger)
 		if err := cmd.Execute(); err != nil {
