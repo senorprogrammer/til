@@ -68,6 +68,7 @@ func main() {
 		cmd := commands.NewListCommand(src.GlobalConfig, logger)
 		if err := cmd.Execute(); err != nil {
 			logger.Defeat(err)
+			return
 		}
 		logger.Victory(statusDone)
 	}
@@ -77,17 +78,20 @@ func main() {
 		repoDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, false)
 		if err != nil {
 			logger.Defeat(err)
+			return
 		}
 
 		// But we need the docs directory for building pages
 		docsDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
 		if err != nil {
 			logger.Defeat(err)
+			return
 		}
 
 		repo, err := git.NewRepository(repoDir, src.GlobalConfig, logger)
 		if err != nil {
 			logger.Defeat(err)
+			return
 		}
 
 		loader := loader.NewPageLoader(docsDir, pages.FileExtension)
@@ -97,6 +101,7 @@ func main() {
 		cmd := commands.NewSaveCommand(builder, loader, repo, resolver, os.Args, logger)
 		if err := cmd.Execute(); err != nil {
 			logger.Defeat(err)
+			return
 		}
 		logger.Victory(statusDone)
 	}
@@ -105,6 +110,7 @@ func main() {
 		tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
 		if err != nil {
 			logger.Defeat(err)
+			return
 		}
 
 		loader := loader.NewPageLoader(tDir, pages.FileExtension)
@@ -113,6 +119,7 @@ func main() {
 		cmd := commands.NewBuildCommand(builder, loader, logger)
 		if err := cmd.Execute(); err != nil {
 			logger.Defeat(err)
+			return
 		}
 		logger.Victory(statusDone)
 	}
@@ -126,16 +133,19 @@ func main() {
 		// Every non-dash argument is considered a part of the title. If there are no arguments, we have no title
 		// Can't have a page without a title
 		logger.Defeat(errors.New(errNoTitle))
+		return
 	}
 
 	tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
 	if err != nil {
 		logger.Defeat(err)
+		return
 	}
 
 	cmd := commands.NewCreateCommand(tDir, title, defaultEditor, logger)
 	if err := cmd.Execute(); err != nil {
 		logger.Defeat(err)
+		return
 	}
 
 	logger.Victory(statusDone)

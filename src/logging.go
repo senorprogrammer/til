@@ -12,6 +12,10 @@ var LL *log.Logger
 
 // Defeat writes out an error message
 func Defeat(err error) {
+	if LL == nil {
+		log.Fatalf("%s %s", Red("✘"), err.Error())
+		return
+	}
 	LL.Fatal(fmt.Sprintf("%s %s", Red("✘"), err.Error()))
 }
 

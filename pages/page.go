@@ -116,7 +116,10 @@ func (page *Page) Link() string {
 // Open tll the OS to open the newly-created page in the editor (as specified in the config)
 // If there's no editor explicitly defined by the user, tell the OS to try and open it
 func (page *Page) Open(defaultEditor string) error {
-	editor := src.GlobalConfig.UString("editor", defaultEditor)
+	editor := defaultEditor
+	if src.GlobalConfig != nil {
+		editor = src.GlobalConfig.UString("editor", defaultEditor)
+	}
 	if editor == "" {
 		editor = defaultEditor
 	}

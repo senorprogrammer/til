@@ -32,11 +32,24 @@ func NewCommitMessageResolver(cfg *config.Config, defaultMsg string) *CommitMess
 // 2. Message defined in config.yml for the commitMessage key
 // 3. Default hard-coded constant
 func (r *CommitMessageResolver) Resolve(args []string, nonFlagArgs int) string {
+	if r.config == nil {
+		return r.defaultMsg
+	}
+
 	if nonFlagArgs == 0 {
 		return r.config.UString("commitMessage", r.defaultMsg)
 	}
 
+	// Ensure nonFlagArgs doesn't exceed len(args) to prevent index out of bounds
+	if nonFlagArgs > len(args) {
+		nonFlagArgs = len(args)
+	}
+
 	msgOffset := len(args) - nonFlagArgs
+	if msgOffset < 0 {
+		msgOffset = 0
+	}
+
 	return strings.Join(args[msgOffset:], " ")
 }
 
@@ -66,13 +79,22 @@ func (c *ListCommand) Name() string {
 
 // Execute lists the configured target directories from the configuration
 func (c *ListCommand) Execute() error {
+	if c.config == nil {
+		return fmt.Errorf("config cannot be nil")
+	}
+
 	dirMap, err := c.config.Map("targetDirectories")
 	if err != nil {
 		return err
 	}
 
 	for key, dir := range dirMap {
-		c.logger.Info(fmt.Sprintf("%6s\t%s", key, dir.(string)))
+		str, ok := dir.(string)
+		if !ok {
+			c.logger.Info(fmt.Sprintf("%6s\t<invalid type: not a string>", key))
+			continue
+		}
+		c.logger.Info(fmt.Sprintf("%6s\t%s", key, str))
 	}
 
 	return nil

@@ -43,6 +43,10 @@ func NewRepository(dir string, cfg *config.Config, logger Logger) (*GitRepositor
 
 // Commit commits all changes in the repository with the given message
 func (r *GitRepository) Commit(msg string) error {
+	if r.config == nil {
+		return fmt.Errorf("config cannot be nil")
+	}
+
 	w, err := r.repo.Worktree()
 	if err != nil {
 		return fmt.Errorf("failed to get worktree: %w", err)

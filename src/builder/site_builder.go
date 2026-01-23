@@ -41,6 +41,10 @@ type SiteBuilder struct {
 
 // BuildIndex creates the main index.md page
 func (b *SiteBuilder) BuildIndex(pageSet []*pages.Page, tagMap *pages.TagMap) error {
+	if b.logger == nil {
+		return fmt.Errorf("logger cannot be nil")
+	}
+
 	b.logger.Info("building index page")
 
 	var content strings.Builder
@@ -81,6 +85,10 @@ func (b *SiteBuilder) BuildIndex(pageSet []*pages.Page, tagMap *pages.TagMap) er
 // Tag pages are built concurrently using goroutines for better performance.
 // TagMap methods are read-only during concurrent access, which is safe for concurrent use.
 func (b *SiteBuilder) BuildTagPages(tagMap *pages.TagMap) error {
+	if b.logger == nil {
+		return fmt.Errorf("logger cannot be nil")
+	}
+
 	b.logger.Info("building tag pages")
 
 	tagNames := tagMap.SortedTagNames()

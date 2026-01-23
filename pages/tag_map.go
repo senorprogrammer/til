@@ -56,11 +56,12 @@ func (tm *TagMap) PagesFor(tagName string) []*Page {
 
 	for _, tag := range tags {
 		pages = append(pages, tag.Pages...)
-
-		sort.Slice(pages, func(i, j int) bool {
-			return pages[i].CreatedAt().After(pages[j].CreatedAt())
-		})
 	}
+
+	// Sort once after collecting all pages, not inside the loop
+	sort.Slice(pages, func(i, j int) bool {
+		return pages[i].CreatedAt().After(pages[j].CreatedAt())
+	})
 
 	return pages
 }
