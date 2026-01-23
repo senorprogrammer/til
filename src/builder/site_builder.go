@@ -34,13 +34,12 @@ type SiteBuilder struct {
 	logger    Logger
 }
 
-// NewSiteBuilder creates a new SiteBuilder
-func NewSiteBuilder(targetDir string, writer FileWriter, logger Logger) *SiteBuilder {
-	return &SiteBuilder{
-		targetDir: targetDir,
-		writer:    writer,
-		logger:    logger,
+// BuildAll builds both index and tag pages
+func (b *SiteBuilder) BuildAll(pageSet []*pages.Page, tagMap *pages.TagMap) error {
+	if err := b.BuildTagPages(tagMap); err != nil {
+		return err
 	}
+	return b.BuildIndex(pageSet, tagMap)
 }
 
 // BuildIndex creates the main index.md page
@@ -110,12 +109,13 @@ func (b *SiteBuilder) BuildTagPages(tagMap *pages.TagMap) error {
 	return nil
 }
 
-// BuildAll builds both index and tag pages
-func (b *SiteBuilder) BuildAll(pageSet []*pages.Page, tagMap *pages.TagMap) error {
-	if err := b.BuildTagPages(tagMap); err != nil {
-		return err
+// NewSiteBuilder creates a new SiteBuilder
+func NewSiteBuilder(targetDir string, writer FileWriter, logger Logger) *SiteBuilder {
+	return &SiteBuilder{
+		targetDir: targetDir,
+		writer:    writer,
+		logger:    logger,
 	}
-	return b.BuildIndex(pageSet, tagMap)
 }
 
 // pagesToHTMLUnorderedList creates the unordered list of page links
