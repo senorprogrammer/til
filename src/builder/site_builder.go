@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/senorprogrammer/til/pages"
 	"github.com/senorprogrammer/til/src"
@@ -80,30 +81,66 @@ func (b *SiteBuilder) BuildIndex(pageSet []*pages.Page, tagMap *pages.TagMap) er
 	return nil
 }
 
-// BuildTagPages creates tag pages with links to posts tagged with those names
+// BuildTagPages creates tag pages with links to posts tagged with those names.
+// Tag pages are built concurrently using goroutines for better performance.
+// TagMap methods are read-only during concurrent access, which is safe for concurrent use.
 func (b *SiteBuilder) BuildTagPages(tagMap *pages.TagMap) error {
 	b.logger.Info("building tag pages")
 
-	for _, tagName := range tagMap.SortedTagNames() {
-		var content strings.Builder
-		content.WriteString(fmt.Sprintf("## %s\n\n", tagName))
+	tagNames := tagMap.SortedTagNames()
+	if len(tagNames) == 0 {
+		return nil
+	}
 
-		// Write the page list into the middle of the page
-		content.WriteString(pagesToHTMLUnorderedList(tagMap.PagesFor(tagName)))
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var errors []error
 
-		// Write the footer content into the bottom of the page
-		content.WriteString("\n")
-		content.WriteString(src.Footer())
+	for _, tagName := range tagNames {
+		wg.Add(1)
 
-		// Write the file to disk
-		filePath := fmt.Sprintf("%s/%s.%s", b.targetDir, tagName, pages.FileExtension)
+		go func(tagName string) {
+			defer wg.Done()
 
-		err := b.writer.WriteFile(filePath, []byte(content.String()), 0644)
-		if err != nil {
-			return fmt.Errorf("failed to write tag page %s: %w", tagName, err)
+			var content strings.Builder
+			content.WriteString(fmt.Sprintf("## %s\n\n", tagName))
+
+			// Write the page list into the middle of the page
+			// TagMap.PagesFor is read-only and safe for concurrent access
+			content.WriteString(pagesToHTMLUnorderedList(tagMap.PagesFor(tagName)))
+
+			// Write the footer content into the bottom of the page
+			content.WriteString("\n")
+			content.WriteString(src.Footer())
+
+			// Write the file to disk
+			filePath := fmt.Sprintf("%s/%s.%s", b.targetDir, tagName, pages.FileExtension)
+
+			err := b.writer.WriteFile(filePath, []byte(content.String()), 0644)
+			if err != nil {
+				mu.Lock()
+				errors = append(errors, fmt.Errorf("failed to write tag page %s: %w", tagName, err))
+				mu.Unlock()
+				return
+			}
+
+			b.logger.Progress(filePath)
+		}(tagName)
+	}
+
+	wg.Wait()
+
+	// Return the first error if any occurred, or combine all errors for better diagnostics
+	if len(errors) > 0 {
+		if len(errors) == 1 {
+			return errors[0]
 		}
-
-		b.logger.Progress(filePath)
+		// Multiple errors occurred - return a combined error message
+		errMsgs := make([]string, len(errors))
+		for i, err := range errors {
+			errMsgs[i] = err.Error()
+		}
+		return fmt.Errorf("multiple errors building tag pages: %s", strings.Join(errMsgs, "; "))
 	}
 
 	return nil
