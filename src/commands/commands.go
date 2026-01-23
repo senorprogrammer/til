@@ -6,19 +6,16 @@ import (
 	"strings"
 
 	"github.com/olebedev/config"
+	"github.com/senorprogrammer/til/pages"
 	"github.com/senorprogrammer/til/src/builder"
 	"github.com/senorprogrammer/til/src/git"
 	"github.com/senorprogrammer/til/src/loader"
 	"github.com/senorprogrammer/til/src/logging"
-	"github.com/senorprogrammer/til/pages"
 )
 
-const defaultCommitMsg = "build, save, push"
-
-// CommitMessageResolver determines the commit message to use
 type CommitMessageResolver struct {
-	config      *config.Config
-	defaultMsg  string
+	config     *config.Config
+	defaultMsg string
 }
 
 // NewCommitMessageResolver creates a new CommitMessageResolver
@@ -116,12 +113,12 @@ func (c *BuildCommand) Execute() error {
 
 // SaveCommand builds, commits, and pushes changes
 type SaveCommand struct {
-	builder      *builder.SiteBuilder
-	pageLoader   *loader.PageLoader
-	repo         git.Repository
-	resolver     *CommitMessageResolver
-	args         []string
-	logger       logging.Logger
+	builder    *builder.SiteBuilder
+	pageLoader *loader.PageLoader
+	repo       git.Repository
+	resolver   *CommitMessageResolver
+	args       []string
+	logger     logging.Logger
 }
 
 // NewSaveCommand creates a new SaveCommand
@@ -166,7 +163,7 @@ func (c *SaveCommand) Execute() error {
 
 	// Commit and push
 	commitMsg := c.resolver.Resolve(c.args, flag.NArg())
-	
+
 	c.logger.Info("saving uncommitted files")
 	if err := c.repo.Commit(commitMsg); err != nil {
 		return err
