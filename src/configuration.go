@@ -3,7 +3,6 @@ package src
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -156,7 +155,7 @@ func makeConfigFile() {
 	// Write the default config, but only if the file is empty.
 	// Don't want to stop on any non-default values the user has written in there
 	if fileInfo.Size() == 0 {
-		if ioutil.WriteFile(cPath, []byte(defaultConfig), 0600) != nil {
+		if os.WriteFile(cPath, []byte(defaultConfig), 0600) != nil {
 			Defeat(errors.New(errConfigFileWrite))
 		}
 

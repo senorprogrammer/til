@@ -2,7 +2,7 @@ package pages
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -54,7 +54,7 @@ func NewPage(title string, targetDir string) *Page {
 func PageFromFilePath(filePath string) *Page {
 	page := new(Page)
 
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		src.Defeat(err)
 	}
@@ -137,7 +137,7 @@ func (page *Page) Save() {
 	pageSrc := page.FrontMatter()
 	pageSrc += fmt.Sprintf("# %s\n\n", page.Title)
 
-	err := ioutil.WriteFile(page.FilePath, []byte(pageSrc), 0644)
+	err := os.WriteFile(page.FilePath, []byte(pageSrc), 0644)
 	if err != nil {
 		src.Defeat(err)
 	}

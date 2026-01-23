@@ -4,13 +4,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -34,6 +34,13 @@ const (
 	statusRepoPush = "pushing to remote"
 	statusRepoSave = "saving uncommitted files"
 	statusTagBuild = "building tag pages"
+
+	// titleOffsetWithTarget is the offset in os.Args when target flag is present
+	// (program name + target flag + target value = 3)
+	titleOffsetWithTarget = 3
+	// titleOffsetWithoutTarget is the offset in os.Args when target flag is not present
+	// (program name = 1)
+	titleOffsetWithoutTarget = 1
 )
 
 var (
@@ -121,7 +128,7 @@ func buildContent() {
 func buildIndexPage(pageSet []*pages.Page, tagMap *pages.TagMap) {
 	src.Info(statusIdxBuild)
 
-	content := ""
+	var content strings.Builder
 
 	// Write the tag list into the top of the index
 	tagLinks := []string{}
@@ -133,16 +140,16 @@ func buildIndexPage(pageSet []*pages.Page, tagMap *pages.TagMap) {
 		}
 	}
 
-	content += strings.Join(tagLinks, ", ")
-	content += "\n"
+	content.WriteString(strings.Join(tagLinks, ", "))
+	content.WriteString("\n")
 
 	// Write the page list into the middle of the page
-	content += pagesToHTMLUnorderedList(pageSet)
-	content += "\n"
+	content.WriteString(pagesToHTMLUnorderedList(pageSet))
+	content.WriteString("\n")
 
 	// Write the footer content into the bottom of the index
-	content += "\n"
-	content += src.Footer()
+	content.WriteString("\n")
+	content.WriteString(src.Footer())
 
 	// And write the file to disk
 	tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
@@ -156,7 +163,7 @@ func buildIndexPage(pageSet []*pages.Page, tagMap *pages.TagMap) {
 		pages.FileExtension,
 	)
 
-	err = ioutil.WriteFile(filePath, []byte(content), 0644)
+	err = os.WriteFile(filePath, []byte(content.String()), 0644)
 	if err != nil {
 		src.Defeat(err)
 	}
@@ -178,14 +185,15 @@ func buildTagPages(pageSet []*pages.Page) *pages.TagMap {
 		go func(tagName string) {
 			defer wGroup.Done()
 
-			content := fmt.Sprintf("## %s\n\n", tagName)
+			var content strings.Builder
+			content.WriteString(fmt.Sprintf("## %s\n\n", tagName))
 
 			// Write the page list into the middle of the page
-			content += pagesToHTMLUnorderedList(tagMap.PagesFor(tagName))
+			content.WriteString(pagesToHTMLUnorderedList(tagMap.PagesFor(tagName)))
 
 			// Write the footer content into the bottom of the page
-			content += "\n"
-			content += src.Footer()
+			content.WriteString("\n")
+			content.WriteString(src.Footer())
 
 			// And write the file to disk
 			tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
@@ -200,7 +208,7 @@ func buildTagPages(pageSet []*pages.Page) *pages.TagMap {
 				pages.FileExtension,
 			)
 
-			err = ioutil.WriteFile(filePath, []byte(content), 0644)
+			err = os.WriteFile(filePath, []byte(content.String()), 0644)
 			if err != nil {
 				src.Defeat(err)
 			}
@@ -233,11 +241,13 @@ func createNewPage(title string) {
 
 // determineCommitMessage figures out which commit message to save the repo with
 // The order of precedence is:
-//	* message passed in via the -s flag
-//	* message defined in config.yml for the commitMessage key
-//	* message as a hard-coded constant, at top, in defaultCommitMsg
+//   - message passed in via the -s flag
+//   - message defined in config.yml for the commitMessage key
+//   - message as a hard-coded constant, at top, in defaultCommitMsg
+//
 // Example:
-//  > til -t b -s this is message
+//
+//	> til -t b -s this is message
 func determineCommitMessage(cfg *config.Config, args []string) string {
 	if flag.NArg() == 0 {
 		return cfg.UString("commitMessage", defaultCommitMsg)
@@ -272,13 +282,16 @@ func loadPages() []*pages.Page {
 		src.Defeat(err)
 	}
 
-	filePaths, _ := filepath.Glob(
+	filePaths, err := filepath.Glob(
 		fmt.Sprintf(
 			"%s/*.%s",
 			tDir,
 			pages.FileExtension,
 		),
 	)
+	if err != nil {
+		src.Defeat(fmt.Errorf("failed to glob page files: %w", err))
+	}
 
 	for i := len(filePaths) - 1; i >= 0; i-- {
 		page := pages.PageFromFilePath(filePaths[i])
@@ -288,25 +301,11 @@ func loadPages() []*pages.Page {
 	return pageSet
 }
 
-// // open tll the OS to open the newly-created page in the editor (as specified in the config)
-// // If there's no editor explicitly defined by the user, tell the OS to try and open it
-// func open(page *src.Page) error {
-// 	editor := src.GlobalConfig.UString("editor", defaultEditor)
-// 	if editor == "" {
-// 		editor = defaultEditor
-// 	}
-
-// 	cmd := exec.Command(editor, page.FilePath)
-// 	err := cmd.Run()
-
-// 	return err
-// }
-
 // pagesToHTMLUnorderedList creates the unordered list of page links that appear
 // on the index and tag pages
 func pagesToHTMLUnorderedList(pageSet []*pages.Page) string {
-	content := ""
-	prevPage := &pages.Page{}
+	var content strings.Builder
+	var prevPage *pages.Page
 
 	for _, page := range pageSet {
 		if !page.IsContentPage() {
@@ -314,25 +313,50 @@ func pagesToHTMLUnorderedList(pageSet []*pages.Page) string {
 		}
 
 		// This breaks the page list up by month
-		if prevPage.CreatedMonth() != page.CreatedMonth() {
-			content += "\n"
+		if prevPage != nil && prevPage.CreatedMonth() != page.CreatedMonth() {
+			content.WriteString("\n")
 		}
 
-		content += fmt.Sprintf("* %s\n", page.Link())
+		content.WriteString(fmt.Sprintf("* %s\n", page.Link()))
 
 		prevPage = page
 	}
 
-	return content
+	return content.String()
+}
+
+// titleCase converts a string to title case (capitalizes first letter of each word)
+func titleCase(s string) string {
+	if s == "" {
+		return s
+	}
+
+	var result strings.Builder
+	prevSpace := true
+
+	for _, r := range s {
+		if unicode.IsSpace(r) {
+			result.WriteRune(r)
+			prevSpace = true
+		} else if prevSpace {
+			result.WriteRune(unicode.ToTitle(r))
+			prevSpace = false
+		} else {
+			result.WriteRune(unicode.ToLower(r))
+			prevSpace = false
+		}
+	}
+
+	return result.String()
 }
 
 func parseTitle(targetFlag string, args []string) string {
-	titleOffset := 3
+	titleOffset := titleOffsetWithTarget
 	if targetFlag == "" {
-		titleOffset = 1
+		titleOffset = titleOffsetWithoutTarget
 	}
 
-	return strings.Title(strings.Join(args[titleOffset:], " "))
+	return titleCase(strings.Join(args[titleOffset:], " "))
 }
 
 // push pushes up to the remote git repo
@@ -350,7 +374,7 @@ func push() {
 	}
 
 	err = r.Push(&git.PushOptions{})
-	if err != nil {
+	if err != nil && err != git.NoErrAlreadyUpToDate {
 		src.Defeat(err)
 	}
 }
