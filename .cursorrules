@@ -85,7 +85,7 @@ func NewPage(title string, targetDir string) *Page {
 - Group related constants together
 - Use meaningful constant names, not abbreviations
 - **Function ordering**: Exported functions must always come before private functions in a file
-- **Exported function ordering**: Exported functions must be written in alphabetical order (functions starting with 'A' before 'B', etc.)
+- **Exported function ordering**: Exported constructor functions (functions starting with 'New') must always come first, before all other exported functions. After constructors, all other exported functions must be written in alphabetical order (functions starting with 'A' before 'B', etc.). For example, `NewUser()` comes before `AllUsers()`.
 - **Private function ordering**: Private functions must be written in alphabetical order (functions starting with 'a' before 'b', etc.)
 
 ## Performance
@@ -151,4 +151,4 @@ func NewPage(title string, targetDir string) *Page {
 - [ ] No unnecessary dependencies added
 - [ ] Code is readable and maintainable
 - [ ] Performance implications considered (if applicable)
-- [ ] Functions are ordered correctly (exported before private, alphabetical within each group)
+- [ ] Functions are ordered correctly (exported before private, constructors first among exported, then alphabetical within each group)
