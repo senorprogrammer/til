@@ -405,3 +405,71 @@ func TestCreateCommand_Execute(t *testing.T) {
 		})
 	}
 }
+
+func TestCommitMessageResolver_Resolve_EdgeCases(t *testing.T) {
+	tests := []struct {
+		name        string
+		configYaml  string
+		defaultMsg  string
+		args        []string
+		nonFlagArgs int
+		want        string
+	}{
+		{
+			name:        "nil config uses default",
+			configYaml:  "",
+			defaultMsg:  "default message",
+			args:        []string{"til", "-s"},
+			nonFlagArgs: 0,
+			want:        "default message",
+		},
+		{
+			name:        "nonFlagArgs exceeds len(args)",
+			configYaml:  "commitMessage: from config",
+			defaultMsg:  "default",
+			args:        []string{"til", "-s"},
+			nonFlagArgs: 10, // exceeds len(args), clamped to len(args), msgOffset becomes 0
+			want:        "til -s", // Returns all args joined when offset is 0
+		},
+		{
+			name:        "negative offset handled",
+			configYaml:  "commitMessage: from config",
+			defaultMsg:  "default",
+			args:        []string{"til"},
+			nonFlagArgs: 5, // exceeds len(args), clamped, msgOffset becomes 0
+			want:        "til", // Returns all args joined when offset is 0
+		},
+		{
+			name:        "empty args",
+			configYaml:  "",
+			defaultMsg:  "default",
+			args:        []string{},
+			nonFlagArgs: 0,
+			want:        "default",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var cfg *config.Config
+			if tt.configYaml != "" {
+				var err error
+				cfg, err = config.ParseYamlBytes([]byte(tt.configYaml))
+				if err != nil {
+					t.Fatalf("failed to parse config: %v", err)
+				}
+			}
+
+			resolver := &CommitMessageResolver{
+				config:     cfg,
+				defaultMsg: tt.defaultMsg,
+			}
+
+			got := resolver.Resolve(tt.args, tt.nonFlagArgs)
+
+			if got != tt.want {
+				t.Errorf("CommitMessageResolver.Resolve() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
