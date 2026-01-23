@@ -43,7 +43,6 @@ func (r *CommitMessageResolver) Resolve(args []string, nonFlagArgs int) string {
 // Command defines the interface for all commands
 type Command interface {
 	Execute() error
-	Name() string
 }
 
 // ListCommand lists target directories
