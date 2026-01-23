@@ -27,20 +27,3 @@ func (l *StdLogger) Defeat(err error) {
 func (l *StdLogger) Victory(msg string) {
 	src.Victory(msg)
 }
-
-// LoggedError wraps an error with logging context
-type LoggedError struct {
-	Err    error
-	Logger Logger
-}
-
-func (e *LoggedError) Error() string {
-	return e.Err.Error()
-}
-
-// HandleError logs the error using the logger's Defeat method
-func HandleError(err error, logger Logger) {
-	if err != nil {
-		logger.Defeat(err)
-	}
-}
