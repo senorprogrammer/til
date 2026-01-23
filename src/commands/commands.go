@@ -13,6 +13,7 @@ import (
 	"github.com/senorprogrammer/til/src/logging"
 )
 
+// CommitMessageResolver determines the commit message to use based on precedence
 type CommitMessageResolver struct {
 	config     *config.Config
 	defaultMsg string
@@ -59,10 +60,12 @@ func NewListCommand(cfg *config.Config, logger logging.Logger) *ListCommand {
 	}
 }
 
+// Name returns the name of the command
 func (c *ListCommand) Name() string {
 	return "list"
 }
 
+// Execute lists the configured target directories from the configuration
 func (c *ListCommand) Execute() error {
 	dirMap, err := c.config.Map("targetDirectories")
 	if err != nil {
@@ -92,10 +95,12 @@ func NewBuildCommand(b *builder.SiteBuilder, l *loader.PageLoader, logger loggin
 	}
 }
 
+// Name returns the name of the command
 func (c *BuildCommand) Name() string {
 	return "build"
 }
 
+// Execute builds the index and tag pages from loaded page data
 func (c *BuildCommand) Execute() error {
 	pageSet, err := c.loader.Load()
 	if err != nil {
@@ -140,10 +145,12 @@ func NewSaveCommand(
 	}
 }
 
+// Name returns the name of the command
 func (c *SaveCommand) Name() string {
 	return "save"
 }
 
+// Execute builds the index and tag pages, then commits and pushes changes to the git repository
 func (c *SaveCommand) Execute() error {
 	// Build content
 	pageSet, err := c.pageLoader.Load()
@@ -191,10 +198,12 @@ func NewCreateCommand(targetDir, title, editor string, logger logging.Logger) *C
 	}
 }
 
+// Name returns the name of the command
 func (c *CreateCommand) Name() string {
 	return "create"
 }
 
+// Execute creates a new page file and opens it in the configured editor
 func (c *CreateCommand) Execute() error {
 	page := pages.NewPage(c.title, c.targetDir)
 
