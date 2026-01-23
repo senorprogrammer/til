@@ -39,14 +39,6 @@ type SiteBuilder struct {
 	logger    Logger
 }
 
-// BuildAll builds both index and tag pages
-func (b *SiteBuilder) BuildAll(pageSet []*pages.Page, tagMap *pages.TagMap) error {
-	if err := b.BuildTagPages(tagMap); err != nil {
-		return err
-	}
-	return b.BuildIndex(pageSet, tagMap)
-}
-
 // BuildIndex creates the main index.md page
 func (b *SiteBuilder) BuildIndex(pageSet []*pages.Page, tagMap *pages.TagMap) error {
 	b.logger.Info("building index page")
