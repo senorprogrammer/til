@@ -3,7 +3,6 @@ package src
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -65,7 +64,7 @@ func getConfigDir() (string, error) {
 	// user has set their $XDG_CONFIG_HOME to something specific, and we
 	// do not mess with it (because doing so makes the archlinux people
 	// very cranky)
-	if cDir[0] != '~' {
+	if len(cDir) == 0 || cDir[0] != '~' {
 		return cDir, nil
 	}
 
@@ -156,7 +155,7 @@ func makeConfigFile() {
 	// Write the default config, but only if the file is empty.
 	// Don't want to stop on any non-default values the user has written in there
 	if fileInfo.Size() == 0 {
-		if ioutil.WriteFile(cPath, []byte(defaultConfig), 0600) != nil {
+		if os.WriteFile(cPath, []byte(defaultConfig), 0600) != nil {
 			Defeat(errors.New(errConfigFileWrite))
 		}
 

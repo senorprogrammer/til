@@ -2,6 +2,7 @@ package src
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -36,6 +37,10 @@ func BuildTargetDirectory() {
 // GetTargetDir returns the absolute string path to the directory that the
 // content will be written to
 func GetTargetDir(cfg *config.Config, targetDirFlag string, withDocsDir bool) (string, error) {
+	if cfg == nil {
+		return "", errors.New("config cannot be nil")
+	}
+
 	docsBit := ""
 	if withDocsDir {
 		docsBit = "/docs"
@@ -56,7 +61,11 @@ func GetTargetDir(cfg *config.Config, targetDirFlag string, withDocsDir bool) (s
 	// left side, not so much on the right side. Convert the right to strings
 	tDirs := make(map[string]string, len(uDirs))
 	for k, dir := range uDirs {
-		tDirs[k] = dir.(string)
+		str, ok := dir.(string)
+		if !ok {
+			return "", fmt.Errorf("target directory value for key %q is not a string", k)
+		}
+		tDirs[k] = str
 	}
 
 	// Extracts the dir we want operate against by using the value of the
@@ -84,7 +93,7 @@ func GetTargetDir(cfg *config.Config, targetDirFlag string, withDocsDir bool) (s
 	// If we're not using a path relative to the user's home directory,
 	// take the config value as a fully-qualified path and just append the
 	// name of the write dir to it
-	if tDir[0] != '~' {
+	if len(tDir) == 0 || tDir[0] != '~' {
 		return tDir + docsBit, nil
 	}
 

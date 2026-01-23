@@ -2,7 +2,7 @@ package pages
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -54,7 +54,7 @@ func NewPage(title string, targetDir string) *Page {
 func PageFromFilePath(filePath string) *Page {
 	page := new(Page)
 
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		src.Defeat(err)
 	}
@@ -116,7 +116,10 @@ func (page *Page) Link() string {
 // Open tll the OS to open the newly-created page in the editor (as specified in the config)
 // If there's no editor explicitly defined by the user, tell the OS to try and open it
 func (page *Page) Open(defaultEditor string) error {
-	editor := src.GlobalConfig.UString("editor", defaultEditor)
+	editor := defaultEditor
+	if src.GlobalConfig != nil {
+		editor = src.GlobalConfig.UString("editor", defaultEditor)
+	}
 	if editor == "" {
 		editor = defaultEditor
 	}
@@ -137,7 +140,7 @@ func (page *Page) Save() {
 	pageSrc := page.FrontMatter()
 	pageSrc += fmt.Sprintf("# %s\n\n", page.Title)
 
-	err := ioutil.WriteFile(page.FilePath, []byte(pageSrc), 0644)
+	err := os.WriteFile(page.FilePath, []byte(pageSrc), 0644)
 	if err != nil {
 		src.Defeat(err)
 	}
