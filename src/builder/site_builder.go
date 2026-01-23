@@ -39,6 +39,15 @@ type SiteBuilder struct {
 	logger    Logger
 }
 
+// NewSiteBuilder creates a new SiteBuilder
+func NewSiteBuilder(targetDir string, writer FileWriter, logger Logger) *SiteBuilder {
+	return &SiteBuilder{
+		targetDir: targetDir,
+		writer:    writer,
+		logger:    logger,
+	}
+}
+
 // BuildIndex creates the main index.md page
 func (b *SiteBuilder) BuildIndex(pageSet []*pages.Page, tagMap *pages.TagMap) error {
 	if b.logger == nil {
@@ -148,15 +157,6 @@ func (b *SiteBuilder) BuildTagPages(tagMap *pages.TagMap) error {
 	}
 
 	return nil
-}
-
-// NewSiteBuilder creates a new SiteBuilder
-func NewSiteBuilder(targetDir string, writer FileWriter, logger Logger) *SiteBuilder {
-	return &SiteBuilder{
-		targetDir: targetDir,
-		writer:    writer,
-		logger:    logger,
-	}
 }
 
 // pagesToHTMLUnorderedList creates the unordered list of page links
