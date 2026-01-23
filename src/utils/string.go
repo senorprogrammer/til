@@ -42,5 +42,10 @@ func ParseTitle(targetFlag string, args []string) string {
 		titleOffset = titleOffsetWithoutTarget
 	}
 
+	// Bounds check: if args doesn't have enough elements, return empty string
+	if len(args) <= titleOffset {
+		return ""
+	}
+
 	return TitleCase(strings.Join(args[titleOffset:], " "))
 }
