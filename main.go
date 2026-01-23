@@ -61,26 +61,11 @@ func main() {
 	   but precedence has been set and we will defer to it.
 	   According to wiktionary.org, "stick-handling" is correctly spelled
 	   "stickhandling", so here we are, abomination enshrined */
+	/* These operations are mutually exclusive. If saveFlag is set, buildFlag
+	   is ignored since Save includes Build functionality. */
 
 	if listFlag {
 		cmd := commands.NewListCommand(src.GlobalConfig, logger)
-		if err := cmd.Execute(); err != nil {
-			logger.Defeat(err)
-		}
-		logger.Victory(statusDone)
-	}
-
-	if buildFlag {
-		tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
-		if err != nil {
-			logger.Defeat(err)
-		}
-
-		loader := loader.NewPageLoader(tDir, pages.FileExtension)
-		writer := &builder.OSFileWriter{}
-		builder := builder.NewSiteBuilder(tDir, writer, logger)
-
-		cmd := commands.NewBuildCommand(builder, loader, logger)
 		if err := cmd.Execute(); err != nil {
 			logger.Defeat(err)
 		}
@@ -111,6 +96,23 @@ func main() {
 		resolver := commands.NewCommitMessageResolver(src.GlobalConfig, defaultCommitMsg)
 
 		cmd := commands.NewSaveCommand(builder, loader, repo, resolver, os.Args, logger)
+		if err := cmd.Execute(); err != nil {
+			logger.Defeat(err)
+		}
+		logger.Victory(statusDone)
+	}
+
+	if buildFlag {
+		tDir, err := src.GetTargetDir(src.GlobalConfig, targetDirFlag, true)
+		if err != nil {
+			logger.Defeat(err)
+		}
+
+		loader := loader.NewPageLoader(tDir, pages.FileExtension)
+		writer := &builder.OSFileWriter{}
+		builder := builder.NewSiteBuilder(tDir, writer, logger)
+
+		cmd := commands.NewBuildCommand(builder, loader, logger)
 		if err := cmd.Execute(); err != nil {
 			logger.Defeat(err)
 		}
