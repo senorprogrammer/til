@@ -9,6 +9,7 @@ import (
 	"github.com/olebedev/config"
 	"github.com/senorprogrammer/til/pages"
 	"github.com/senorprogrammer/til/src"
+	"github.com/senorprogrammer/til/src/commands"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,7 +48,8 @@ func Test_determineCommitMessage(t *testing.T) {
 			msg := fmt.Sprintf("commitMessage: %s", tt.cfgMessage)
 			cfg, _ := config.ParseYamlBytes([]byte(msg))
 
-			actual := determineCommitMessage(cfg, os.Args)
+			resolver := commands.NewCommitMessageResolver(cfg, "build, save, push")
+			actual := resolver.Resolve(os.Args, flag.NArg())
 
 			assert.Equal(t, tt.expected, actual)
 		})
