@@ -56,12 +56,12 @@ func PageFromFilePath(filePath string) *Page {
 
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		src.Defeat(err)
+		src.Defeat(fmt.Errorf("failed to read file %s: %w", filePath, err))
 	}
 
 	err = frontmatter.Unmarshal(data, page)
 	if err != nil {
-		src.Defeat(err)
+		src.Defeat(fmt.Errorf("failed to parse frontmatter in %s: %w", filePath, err))
 	}
 
 	page.FilePath = filePath
