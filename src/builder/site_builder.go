@@ -116,7 +116,7 @@ func (b *SiteBuilder) BuildTagPages(tagMap *pages.TagMap) error {
 			defer wg.Done()
 
 			var content strings.Builder
-			content.WriteString(fmt.Sprintf("## %s\n\n", tagName))
+			fmt.Fprintf(&content, "## %s\n\n", tagName)
 
 			// Write the page list into the middle of the page
 			// TagMap.PagesFor is read-only and safe for concurrent access
@@ -124,7 +124,6 @@ func (b *SiteBuilder) BuildTagPages(tagMap *pages.TagMap) error {
 
 			// Write the footer content into the bottom of the page
 			content.WriteString("\n")
-			content.WriteString(src.Footer())
 
 			// Write the file to disk
 			filePath := fmt.Sprintf("%s/%s.%s", b.targetDir, tagName, pages.FileExtension)
