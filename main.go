@@ -13,6 +13,7 @@ import (
 	"github.com/senorprogrammer/til/src/git"
 	"github.com/senorprogrammer/til/src/loader"
 	"github.com/senorprogrammer/til/src/logging"
+	"github.com/senorprogrammer/til/src/tui"
 	"github.com/senorprogrammer/til/src/utils"
 )
 
@@ -51,8 +52,7 @@ func init() {
 func main() {
 	flag.Parse()
 
-	cnf := &src.Config{}
-	cnf.Load()
+	(&src.Config{}).Load()
 
 	logger := logging.NewStdLogger()
 
@@ -122,6 +122,16 @@ func main() {
 			return
 		}
 		logger.Victory(statusDone)
+	}
+
+	// If no flags are set, launch interactive TUI
+	if !listFlag && !saveFlag && !buildFlag {
+		if err := tui.RunInteractive(src.GlobalConfig, logger); err != nil {
+			logger.Defeat(err)
+			return
+		}
+		logger.Victory(statusDone)
+		return
 	}
 
 	src.BuildTargetDirectory()
